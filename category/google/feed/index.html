@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	
+	xmlns:georss="http://www.georss.org/georss"
+	xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	>
+
+<channel>
+	<title>Google &#8211; OpnSec</title>
+	<atom:link href="/category/google/feed/" rel="self" type="application/rss+xml" />
+	<link></link>
+	<description>Open mind Security and Crypto!</description>
+	<lastBuildDate>Fri, 30 Jul 2021 20:07:09 +0000</lastBuildDate>
+	<language>en-US</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.0.11</generator>
+
+<image>
+	<url>/wp-content/uploads/2017/08/cropped-opnsec-32x32.png</url>
+	<title>Google &#8211; OpnSec</title>
+	<link></link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+<site xmlns="com-wordpress:feed-additions:1">250189475</site>	<item>
+		<title>DOM XSS in Gmail with a little help from Chrome</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=dom-xss-in-gmail-with-a-little-help-from-chrome</link>
+					<comments>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comments</comments>
+		
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Sun, 03 May 2020 06:04:09 +0000</pubDate>
+				<category><![CDATA[Google]]></category>
+		<guid isPermaLink="false">/?p=382</guid>
+
+					<description><![CDATA[How to use browser features to help find DOM XSS. The invisible Messages of Gmail Last year, I looked for DOM XSS in Gmail website. Instead of using url params or the emails themselves as the source of the attack, I decided to use the much more discreet yet ubiquitous postMessage api.  At first glance,&#8230; <a class="read-more" href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/">Read More</a>]]></description>
+										<content:encoded><![CDATA[<p>How to use browser features to help find DOM XSS.</p>
+<h3>The invisible Messages of Gmail</h3>
+<p>Last year, I looked for DOM XSS in Gmail website. Instead of using url params or the emails themselves as the source of the attack, I decided to use the much more discreet yet ubiquitous <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage" target="_blank" rel="noopener noreferrer">postMessage</a> api.  At first glance, the Gmail inbox seems a simple webpage, but if you go through the looking glass, it&#8217;s actually a dozen of different webpages (or iframes) communicating between each others.</p>
+<p><img loading="lazy" class="alignnone size-large wp-image-384" src="/wp-content/uploads/2020/05/iframes-1024x547.png" alt="" width="1024" height="547" srcset="/wp-content/uploads/2020/05/iframes-1024x547.png 1024w, /wp-content/uploads/2020/05/iframes-300x160.png 300w, /wp-content/uploads/2020/05/iframes-768x410.png 768w, /wp-content/uploads/2020/05/iframes-1536x821.png 1536w, /wp-content/uploads/2020/05/iframes.png 1920w" sizes="(max-width: 1024px) 100vw, 1024px" /></p>
+<p>My first task was to make the cross-frames messages visible. This is not a native feature in DevTools yet. Instead, you can use this simple <a href="https://github.com/opnsec/postMessage-logger" target="_blank" rel="noopener noreferrer">postMessage logger extension</a>. After reloading, the console is now overwhelmed with frame to frame messages going back and forth.</p>
+<p><img loading="lazy" class="alignnone size-large wp-image-385" src="/wp-content/uploads/2020/05/postmessage-1024x547.png" alt="" width="1024" height="547" srcset="/wp-content/uploads/2020/05/postmessage-1024x547.png 1024w, /wp-content/uploads/2020/05/postmessage-300x160.png 300w, /wp-content/uploads/2020/05/postmessage-768x410.png 768w, /wp-content/uploads/2020/05/postmessage-1536x821.png 1536w, /wp-content/uploads/2020/05/postmessage.png 1600w" sizes="(max-width: 1024px) 100vw, 1024px" /></p>
+<blockquote><p>Each message has a <strong>target</strong> (the frame which receives the message), a <strong>source</strong> (the frame which sent the message), an <strong>origin</strong> (the domain of the source) and the <strong>data</strong>, which can be a string or a JSON object (or any kind of object that <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm">will be cloned</a> in the process). Messages can be sent by any frame to another, even from different domain and even from different tab if the source has a reference to the target, with window.opener, window.open() and window.frames.</p></blockquote>
+<p>The target receives the message using <pre><code ><span class="pl-en">addEventListener</span><span class="pl-kos">(</span><span class="pl-s">"message", function(message){/* handle message here */})</code></pre> like in the extension.</span></p>
+<p>If there are too many messages, you can customize the extension to filter messages by any of their property. I was looking for interesting messages and one message in particular contained an url in the data:</p>
+<p><img loading="lazy" class="alignnone size-large wp-image-387" src="/wp-content/uploads/2020/05/frame-1024x340.png" alt="" width="1024" height="340" srcset="/wp-content/uploads/2020/05/frame-1024x340.png 1024w, /wp-content/uploads/2020/05/frame-300x100.png 300w, /wp-content/uploads/2020/05/frame-768x255.png 768w, /wp-content/uploads/2020/05/frame.png 1182w" sizes="(max-width: 1024px) 100vw, 1024px" /></p>
+<p>This message is sent by &#8220;hangouts.google.com&#8221; to &#8220;mail.google.com&#8221; . Not only is there a url in the message data, but the url contains the word &#8220;frame&#8221;. interesting&#8230;</p>
+<h3>The browser Toolbox</h3>
+<p>I went to the network tab of DevTools and filtered the requests by type &#8220;doc&#8221; which means &#8220;top window url and iframes src&#8221;. The same url was there:</p>
+<p><img loading="lazy" class="alignnone size-large wp-image-389" src="/wp-content/uploads/2020/05/network-1024x480.png" alt="" width="1024" height="480" srcset="/wp-content/uploads/2020/05/network-1024x480.png 1024w, /wp-content/uploads/2020/05/network-300x141.png 300w, /wp-content/uploads/2020/05/network-768x360.png 768w, /wp-content/uploads/2020/05/network.png 1155w" sizes="(max-width: 1024px) 100vw, 1024px" /></p>
+<p>I could also confirm that the request referrer was &#8220;mail.google.com&#8221; which was a good sign since it&#8217;s the domain that received the Message. The value in red circle is the initiator of the request, the JS code that loaded the iframe. You can click on it and it brings you directly to the corresponding code in the source tab. Unminify the code, set a breakpoint, reload and the breakpoint is hit:</p>
+<p><img loading="lazy" class="alignnone size-large wp-image-390" src="/wp-content/uploads/2020/05/debug-1024x441.png" alt="" width="1024" height="441" srcset="/wp-content/uploads/2020/05/debug-1024x441.png 1024w, /wp-content/uploads/2020/05/debug-300x129.png 300w, /wp-content/uploads/2020/05/debug-768x331.png 768w, /wp-content/uploads/2020/05/debug.png 1533w" sizes="(max-width: 1024px) 100vw, 1024px" /></p>
+<p>And voila! The function that triggers the request is appendChild(). This is pretty much all we can understand from the code which is unreadable. But with the magic of the debugger we can confirm that the argument contains an iframe with the src set to the url. If you click on the functions in the Call Stack on the right, you can navigate through the &#8220;control flow&#8221; of the program and understand its logic.</p>
+<p>For example, here is how the message is received by the frame:</p>
+<p><img loading="lazy" class="alignnone size-full wp-image-391" src="/wp-content/uploads/2020/05/listener.png" alt="" width="766" height="217" srcset="/wp-content/uploads/2020/05/listener.png 766w, /wp-content/uploads/2020/05/listener-300x85.png 300w" sizes="(max-width: 766px) 100vw, 766px" /></p>
+<p>You can even see the code where the source of the message sent it:</p>
+<p><img loading="lazy" class="alignnone size-full wp-image-392" src="/wp-content/uploads/2020/05/post.png" alt="" width="1013" height="319" srcset="/wp-content/uploads/2020/05/post.png 1013w, /wp-content/uploads/2020/05/post-300x94.png 300w, /wp-content/uploads/2020/05/post-768x242.png 768w" sizes="(max-width: 1013px) 100vw, 1013px" /></p>
+<blockquote><p>There are dozens of functions between the listener and the loading of the url, across multiple files and thousands of lines of code. It is not uncommon that the browser freezes, breaks or skips breakpoint when you debug such heavy webpages, it&#8217;s a matter of trial and error! <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f609.png" alt="😉" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p></blockquote>
+<p>I tried to send a message to the frame from the console with the same data but with &#8220;javascript:alert(1)&#8221; instead of the url. I didn&#8217;t got an alertbox, but a CSP error message.</p>
+<p><img loading="lazy" class="alignnone size-large wp-image-393" src="/wp-content/uploads/2020/05/csp-1024x52.png" alt="" width="1024" height="52" srcset="/wp-content/uploads/2020/05/csp-1024x52.png 1024w, /wp-content/uploads/2020/05/csp-300x15.png 300w, /wp-content/uploads/2020/05/csp-768x39.png 768w, /wp-content/uploads/2020/05/csp-1536x79.png 1536w, /wp-content/uploads/2020/05/csp.png 1779w" sizes="(max-width: 1024px) 100vw, 1024px" /></p>
+<p>Thankfully, this CSP rule wasn&#8217;t enforced by IE11 and Edge (at the time) so I was able to trigger the alertbox on those browsers. There was no check on the origin of the message. A simple attack scenario is to start from the attacker webpage, open a new tab to Gmail and inject the payload in the Gmail tab using postMessage. The Gmail tab loads the javascript iframe and the attacker has arbitrary code execution on the victim&#8217;s Gmail page, which means it can read and send emails, change password of accounts registered to this email etc&#8230;</p>
+<h3>The random Channel Name</h3>
+<p>There was still one issue: with so much communication between so many frames, it is easy to get confused, so messages usually have a channel name. The name is a random 6 char generated by &#8220;mail.google.com&#8221; and transmitted in the first message to &#8220;hangouts.google.com&#8221;. In all following messages that it receives, &#8220;hangouts.google.com&#8221; checks if it contains the correct channel name, and if not it doesn&#8217;t process the message.</p>
+<p>The attacker doesn&#8217;t know the channel name, and 6 alphanumeric is too much possibilities to try all.<br />
+The random generator is &#8220;Math.random()&#8221; which is not secure and <a href="http://ifsec.blogspot.com/2012/09/of-html5-security-cross-domain.html" target="_blank" rel="noopener noreferrer">has been exploited</a> in the past by a Google engineer to find an XSS in Facebook! <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /> However the technique required the state of the random generator to be shared between cross-domain tabs which is not the case anymore.<br />
+The third solution is to load an iframe controlled by the attacker in the hierarchy of frames in the Gmail tab. Because of the way cross-domain redirection of iframes works in the browser, the fact that Gmail X-Frame-Options header is &#8220;SAMEORIGIN&#8221; and that the messages were sent with the argument targetOrigin &#8220;*&#8221;, it would then be possible to intercept the channel name and execute the XSS.</p>
+<h3>Conclusion</h3>
+<p>I couldn&#8217;t find an easy way to load an iframe inside Gmail, but with all this I was confident enough to send a report to Google VRP and after a few days I received the &#8220;Nice Catch&#8221; answer and reward. Google fixed it by adding check on the origin of the message containing the url. The XSS doesn&#8217;t work anymore, but the message is still sent if you want to check.</p>
+<p>Browsers have all the cool features to navigate complex code, and for the features that are still missing, you can build you own extensions easily. With that, good hunting! <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p>
+<p>&nbsp;</p>
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fopnsec.com%2F2020%2F05%2Fdom-xss-in-gmail-with-a-little-help-from-chrome%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+]]></content:encoded>
+					
+					<wfw:commentRss>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/feed/</wfw:commentRss>
+			<slash:comments>8</slash:comments>
+		
+		
+		<post-id xmlns="com-wordpress:feed-additions:1">382</post-id>	</item>
+		<item>
+		<title>Into the Borg &#8211; SSRF inside Google production network</title>
+		<link>/2018/07/into-the-borg-ssrf-inside-google-production-network/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=into-the-borg-ssrf-inside-google-production-network</link>
+					<comments>/2018/07/into-the-borg-ssrf-inside-google-production-network/#comments</comments>
+		
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Fri, 20 Jul 2018 14:51:40 +0000</pubDate>
+				<category><![CDATA[Google]]></category>
+		<category><![CDATA[Borg]]></category>
+		<category><![CDATA[Kubernetes]]></category>
+		<category><![CDATA[SSRF]]></category>
+		<guid isPermaLink="false">/?p=317</guid>
+
+					<description><![CDATA[Intro &#8211; Testing Google Sites and Google Caja In March 2018, I reported an XSS in Google Caja, a tool to securely embed arbitrary html/javascript in a webpage. In May 2018, after the XSS was fixed, I realised that Google Sites was using an unpatched version of Google Caja, so I looked if it was&#8230; <a class="read-more" href="/2018/07/into-the-borg-ssrf-inside-google-production-network/">Read More</a>]]></description>
+										<content:encoded><![CDATA[<h3><img loading="lazy" class=" wp-image-327 aligncenter" src="/wp-content/uploads/2018/07/borg2-1024x498.png" alt="Borglet status monitor" width="864" height="420" srcset="/wp-content/uploads/2018/07/borg2-1024x498.png 1024w, /wp-content/uploads/2018/07/borg2-300x146.png 300w, /wp-content/uploads/2018/07/borg2-768x374.png 768w, /wp-content/uploads/2018/07/borg2.png 1864w" sizes="(max-width: 864px) 100vw, 864px" /></h3>
+<h3></h3>
+<h3>Intro &#8211; Testing Google Sites and Google Caja</h3>
+<p>In March 2018, I reported an XSS in <a href="https://developers.google.com/caja/" target="_blank" rel="noopener noreferrer">Google Caja</a>, a tool to securely embed arbitrary html/javascript in a webpage.<br />
+In May 2018, after the XSS was fixed, I realised that Google Sites was using an unpatched version of Google Caja, so I looked if it was vulnerable to the XSS. However, the XSS wasn&#8217;t exploitable there.</p>
+<p>Google Caja parses html/javascript and modifies it to remove any javascript sensitive content, such as iframe or object tags and javascript sensitive properties such as document.cookie. Caja mostly parses and sanitizes HTML tags on the client side. However, for remote javascript tag (&lt;script src=&#8221;xxx&#8221;&gt;), the remote resource was fetched, parsed and sanitized on the server-side.<br />
+I tried to host a javascript file on my server (https://[attacker].com/script.js) and check if the Google Sites server would fall for the XSS when parsed server-side but the server replied that https://[attacker].com/script.js was not accessible.</p>
+<p>After a few tests, I realised that the Google Sites Caja server would only fetch Google-owned resources like https://www.google.com or https://www.gstatic.com, but not any external resource like https://www.facebook.com.<br />
+That&#8217;s a strange behavior because this functionality is meant to fetch external resources so it looks like a broken feature. More interestingly, it is hard to determine whether an arbitrary URL belongs to Google or not, given the breadth of Google services. Unless&#8230;</p>
+<p>&nbsp;</p>
+<h3>Finding an SSRF in Google</h3>
+<p>Whenever I find an endpoint that fetches arbitrary content server-side, I always test for SSRF. I did it a hundred times on Google services but never had any luck. Anyway the only explanation for the weird behavior of the Google Caja server was that the fetching was happening on the internal Google network and that is why it could only fetch Google-owned resources but not external resources. I already knew this was a bug, now the question was whether it was a security bug!</p>
+<p>It&#8217;s very easy to host and run arbitrary code on Google servers, use Google Cloud services! I created a <a href="https://cloud.google.com/appengine/" target="_blank" rel="noopener noreferrer">Google App Engine</a> instance and hosted a javascript file. I then used the URL of this javascript file on Google Sites as a external script resource and updated the Google Sites page. The javascript was successfully fetched and parsed by Google Caja server. I then checked my Google App Engine instance logs to see from where the resource was fetched and it came from 10.x.x.201, a private network IP! This looked very promising.</p>
+<p>I used the private IP as the url for the Google Sites javascript external resource and waited for the moment of truth. The request took more than 30 seconds to complete and at that time I really thought the request was blocked and I almost closed the page since I never had any luck with SSRF on Google before. However, when Google Caja replied, I saw that the reply size wasn&#8217;t around 1 KB like for a typical error message but 1 MB instead! One million bytes of information coming from a 10.x.x.x IP from Google internal network, I can tell you I was excited at this point! <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /><br />
+I opened the file and indeed it was full of private information from Google! \o/</p>
+<p>&nbsp;</p>
+<h3>Google, from the inside</h3>
+<p>First I want to say that I didn&#8217;t scan Google&#8217;s internal network. I only made 3 requests in the network to confirm the vulnerability and immediately sent a report to Google VRP. It took 48 hours to Google to fix the issue (I reported it on a Saturday), so in the meantime I couldn&#8217;t help but test 2-3 more requests to try to pivot the SSRF vulnerability into unrestricted file access or RCE but without luck.</p>
+<p><img loading="lazy" class="aligncenter wp-image-326 size-full" src="/wp-content/uploads/2018/07/borg-1.png" alt="Architecture of Borg" width="490" height="431" srcset="/wp-content/uploads/2018/07/borg-1.png 490w, /wp-content/uploads/2018/07/borg-1-300x264.png 300w" sizes="(max-width: 490px) 100vw, 490px" /></p>
+<p>The first request was to http://10.x.x.201/. It responded with a server status monitoring page of a &#8220;Borglet&#8221;. After a Google search, I could confirm that I was indeed inside <a href="https://storage.googleapis.com/pub-tools-public-publication-data/pdf/43438.pdf" target="_blank" rel="noopener noreferrer"><strong>Borg, Google&#8217;s internal large-scale cluster management system</strong></a> (<a href="https://www.infoq.com/news/2015/04/google-borg" target="_blank" rel="noopener noreferrer">here</a> is a overview of the architecture). Google have open sourced the <a href="https://kubernetes.io/blog/2015/04/borg-predecessor-to-kubernetes/" target="_blank" rel="noopener noreferrer">successor of Borg, Kubernetes</a> in 2014. It seems that while Kubernetes is getting more and more popular, Google is still relying on Borg for its internal production infrastructure, but I can tell you it&#8217;s not because of the design of Borg interfaces! (edit: this is intended as a joke <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f61b.png" alt="😛" class="wp-smiley" style="height: 1em; max-height: 1em;" /> )<br />
+The second request was to http://10.x.x.1/ and it was also a monitoring page for another Borglet. The third request was http://10.x.x.1/getstatus, a different status monitoring page of a Borglet with more details on the jobs like permissions, arguments.</p>
+<p>Each Borglet represents a machine, a server.</p>
+<p>On the hardware side, both servers were using Haswell&#8217;s CPU @2.30GHz with 72 cores, which corresponds to a set of 2 or 3 Xeon E5 v3. Both servers were using the CPUs at 77%. They had 250GB of RAM, which was used at 70%. They had 1 HDD each with 2TB and no SSD. The HDD were almost empty with only 15GB used, so the data is stored elsewhere.</p>
+<p>The processing jobs (alloc and tasks) are very diverse, I believe this optimizes ressource usage with some jobs using memory, others using CPU, network, some with high priority, etc&#8230; Some services seem very active : Video encoding, Gmail and Ads. That should not be surprising since video processing is very heavy, Gmail is one of the main Google services and Ads is, well, Google&#8217;s core business. <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f609.png" alt="😉" class="wp-smiley" style="height: 1em; max-height: 1em;" /><br />
+I didn&#8217;t see Google Sites or Caja in the jobs list, so either the SSRF was going through a proxy or the Borglet on 10.x.x.201 was from a different network than the 10.x.x.201 IP I saw in my Google App Engine instance logs.</p>
+<p>Regarding the architecture, we can find jobs related to almost all of the components of the <a href="http://malteschwarzkopf.de/research/assets/google-stack.pdf" target="_blank" rel="noopener noreferrer">Google Stack</a>, in particular MapReduce, BitTable, Flume, GFS&#8230;<br />
+On the technology side, Java seems to be heavily used. I didn&#8217;t see any mention of Python, C++, NodeJS or Go, but that doesn&#8217;t mean it wasn&#8217;t used so don&#8217;t draw conclusions. <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f61b.png" alt="😛" class="wp-smiley" style="height: 1em; max-height: 1em;" /><br />
+I should mention that Borg, like Kubernetes, relies on containers like Docker, and VMs. For video processing, it seems they are using <a href="https://github.com/google/gvisor" target="_blank" rel="noopener noreferrer">Gvisor</a>, a Google open-source tool that looks like a trade-off between containers performance and VMs security.</p>
+<p>Parameters gives some information on how to reach the applications through network ports. On Borg, it seems that all applications on a server share the same IP address and each has some dedicated ports.</p>
+<p>Apps arguments were the most fun part for me because it is almost code. I didn&#8217;t find Google Search secret algorithm but there was some cool queries like this:<pre><code >MSCR(M(Customer.AdGroupCriterion+Customer.AdGroupCriterion-marshal+FilterDurianAdGroupCriterion+FilterNeedReviewAdGroupCriterion+GroupAdGroupCriterionByAdGroupKey+JoinAdGroupData/MakeUnionTable:3)+M(JoinAdGroupData/MakeUnionTable:2)+M(Customer.AdGroup+Customer.AdGroup-marshal+FilterDurianAdGroup+ParDo(AdGroupDataStripFieldsFn)+JoinAdGroupData/MakeUnionTable)+R(JoinAdGroupData/GroupUnionTables+JoinAdGroupData/ConstructJoinResults+JoinAdGroupData/ExtractTuples+ExtractCreativeAndKeywordReviewables))</code></pre></p>
+<p>If you wonder what&#8217;s Gmail system user, it&#8217;s <pre><code >gmail@prod.google.com</code></pre>There is also a user &#8220;legal-discovery@prod.google.com&#8221; that has permission &#8220;auth.impersonation.impersonateNormalUser&#8221; on &#8220;mdb:all-person-users&#8221;. (edit: for clarification, I just saw these strings close to each other in a big array and assumed that&#8217;s what it meant)</p>
+<p>There was also a little bit of history which showed that most jobs where aborted before finishing.</p>
+<p>At last, there was a lot of url to other servers or applications endpoints. In particular, I tried to access a promising-looking http://wiki/ url but it didn&#8217;t work. I tested a <pre><code >/getFile?FileName=/sys/borglet/borglet.INFO</code></pre> url but got an unauthorized response. I also tried to change the FileName parameter but got error messages.</p>
+<p>&nbsp;</p>
+<h3>Google VRP response</h3>
+<p>I reported the issue on Saturday May 12, 2018, and it was automatically triaged as a P3 (medium priority) issue. On Sunday I sent an email to Google Security that they might want someone to have a look at this. On Monday morning the issue was escalated to P0 (critical) then later decreased to P1. On Monday night the vulnerable endpoint was removed and the issue fixed.</p>
+<p>It&#8217;s not easy to determine the impact of an SSRF because it really depends on what&#8217;s in the internal network. Google tends to keep most of its infrastructure available internally and uses a lot of web endpoints, which means that in case of a SSRF, an attacker could potentially access hundreds if not thousands of internal web applications. On the other hand, Google heavily relies on authentication to access resources which limits the impact of a SSRF.<br />
+In this case, the Borglet status monitoring page wasn&#8217;t authenticated, and it leaked a lot of information about the infrastructure. My understanding is that in Kubernetes, this page is authenticated.</p>
+<p>Google VRP rewarded me with $13,337, which corresponds to something like unrestricted file access! They explained that while most internal resources would require authentication, they have seen in the past dev or debug handlers giving access to more than just info leaks, so they decided to reward for the maximum potential impact. I&#8217;d like to thank them for the bounty and for their quick response.</p>
+<p>&nbsp;</p>
+<p>That&#8217;s it for this story, I hope you enjoyed it as much I did and feel free to comment!</p>
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fopnsec.com%2F2018%2F07%2Finto-the-borg-ssrf-inside-google-production-network%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+]]></content:encoded>
+					
+					<wfw:commentRss>/2018/07/into-the-borg-ssrf-inside-google-production-network/feed/</wfw:commentRss>
+			<slash:comments>7</slash:comments>
+		
+		
+		<post-id xmlns="com-wordpress:feed-additions:1">317</post-id>	</item>
+	</channel>
+</rss>

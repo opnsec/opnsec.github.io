@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	
+	xmlns:georss="http://www.georss.org/georss"
+	xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	
+	>
+<channel>
+	<title>
+	Comments on: Advanced Flash vulnerabilities in Youtube &#8211; Part 4	</title>
+	<atom:link href="/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/feed/" rel="self" type="application/rss+xml" />
+	<link>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=advanced-flash-vulnerabilities-in-youtube-part-4</link>
+	<description>Open mind Security and Crypto!</description>
+	<lastBuildDate>Fri, 30 Jul 2021 20:07:09 +0000</lastBuildDate>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.0.11</generator>
+	<item>
+		<title>
+		By: BHB		</title>
+		<link>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comment-41</link>
+
+		<dc:creator><![CDATA[BHB]]></dc:creator>
+		<pubDate>Wed, 20 Sep 2017 08:22:22 +0000</pubDate>
+		<guid isPermaLink="false">/?p=188#comment-41</guid>
+
+					<description><![CDATA[In reply to &lt;a href=&quot;/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comment-38&quot;&gt;Engue Gillier&lt;/a&gt;.
+
+Thanks you sir!
+Very interesting how the algorithm works. Wouldnt have expected that .mp4 compability is a point that gets checked.
+I have just seen probably a few hundread webpages that show the error message I mentioned. 
+Might take a look on that for Firefox, since it sounds like a logical step.]]></description>
+			<content:encoded><![CDATA[<p>In reply to <a href="/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comment-38">Engue Gillier</a>.</p>
+<p>Thanks you sir!<br />
+Very interesting how the algorithm works. Wouldnt have expected that .mp4 compability is a point that gets checked.<br />
+I have just seen probably a few hundread webpages that show the error message I mentioned.<br />
+Might take a look on that for Firefox, since it sounds like a logical step.</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: Engue Gillier		</title>
+		<link>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comment-38</link>
+
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Tue, 19 Sep 2017 07:22:54 +0000</pubDate>
+		<guid isPermaLink="false">/?p=188#comment-38</guid>
+
+					<description><![CDATA[In reply to &lt;a href=&quot;/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comment-37&quot;&gt;BHB&lt;/a&gt;.
+
+&lt;blockquote&gt;Ah so Google thought we people on old windows machines or linux without HTML5 support (only adobe flash) were evil hackers when using nohtml5=1.&lt;/blockquote&gt;
+Here I&#039;m talking about Youtube embed Apis, to embed a Youtube video in an external website. So it&#039;s not users who manually enter &quot;nohtml5=1&quot; but developers.
+&lt;blockquote&gt;Im not sure about this sentence “When the iframe loads, it will first check if the browser is able to play videos using html5, and if not it will use the Flash fallback. ”&lt;/blockquote&gt;
+When a &quot;youtube.com/embed/&quot; iframe loads, one of the first javascript instructions is :
+&lt;code&gt;try {
+   var vid = document.createElement(&#039;video&#039;);
+if(&#039;&#039; != vid.canPlayType(&#039;video/mp4&#039;)){
+   //html5 player
+} else {
+   //Flash fallback
+}
+} catch(e){
+//Flash fallback
+}&lt;/code&gt;
+It is not only looking whether the browser supports the &#060;video&#062; tag, but also whether the &#060;video&#062; tag supports the mp4 codec. Of course the Flash fallback could fail as well but in that case the video won&#039;t play. But for old browsers Youtube should switch to the Flash fallback without any issue.
+
+Note:
+One last thing, if you really want to use the flash fallback on a modern browser you can install an extension like &quot;YouTube Flash Player&quot; for firefox. What the extension will do is just change the prototype of the vid.canPlayType() method on Youtube webpages so that vid.canPlayType(&#039;video/mp4&#039;) will return &#039;&#039;.
+&lt;code&gt;if(/^https:\/\/www\.youtube\.com\//.test(location.href){
+document.createElement(&quot;video&quot;).constructor.prototype.canPlayType = function(a){ return &#039;&#039;;};
+}&lt;/code&gt;]]></description>
+			<content:encoded><![CDATA[<p>In reply to <a href="/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comment-37">BHB</a>.</p>
+<blockquote><p>Ah so Google thought we people on old windows machines or linux without HTML5 support (only adobe flash) were evil hackers when using nohtml5=1.</p></blockquote>
+<p>Here I&#8217;m talking about Youtube embed Apis, to embed a Youtube video in an external website. So it&#8217;s not users who manually enter &#8220;nohtml5=1&#8221; but developers.</p>
+<blockquote><p>Im not sure about this sentence “When the iframe loads, it will first check if the browser is able to play videos using html5, and if not it will use the Flash fallback. ”</p></blockquote>
+<p>When a &#8220;youtube.com/embed/&#8221; iframe loads, one of the first javascript instructions is :<br />
+<code>try {<br />
+   var vid = document.createElement('video');<br />
+if('' != vid.canPlayType('video/mp4')){<br />
+   //html5 player<br />
+} else {<br />
+   //Flash fallback<br />
+}<br />
+} catch(e){<br />
+//Flash fallback<br />
+}</code><br />
+It is not only looking whether the browser supports the &lt;video&gt; tag, but also whether the &lt;video&gt; tag supports the mp4 codec. Of course the Flash fallback could fail as well but in that case the video won&#8217;t play. But for old browsers Youtube should switch to the Flash fallback without any issue.</p>
+<p>Note:<br />
+One last thing, if you really want to use the flash fallback on a modern browser you can install an extension like &#8220;YouTube Flash Player&#8221; for firefox. What the extension will do is just change the prototype of the vid.canPlayType() method on Youtube webpages so that vid.canPlayType(&#8216;video/mp4&#8217;) will return &#8221;.<br />
+<code>if(/^https:\/\/www\.youtube\.com\//.test(location.href){<br />
+document.createElement("video").constructor.prototype.canPlayType = function(a){ return '';};<br />
+}</code></p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: BHB		</title>
+		<link>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comment-37</link>
+
+		<dc:creator><![CDATA[BHB]]></dc:creator>
+		<pubDate>Tue, 19 Sep 2017 06:19:00 +0000</pubDate>
+		<guid isPermaLink="false">/?p=188#comment-37</guid>
+
+					<description><![CDATA[Ah so Google thought we people on old windows machines or linux without HTML5 support (only adobe flash) were evil hackers when using nohtml5=1.
+Im not sure about this sentence &quot;When the iframe loads, it will first check if the browser is able to play videos using html5, and if not it will use the Flash fallback. &quot;
+
+Old browsers that only support html5 sluggish will probably try to use html5 and never flash.
+That was exactly the reason why so many off these people used the workarounds like /v/ or nohtml5=1. 
+Anyway Youtube operated by Google has already spoken the last words:
+&quot;Flash-embedded videos are no longer supported, but you can still watch this video on YouTube&quot;]]></description>
+			<content:encoded><![CDATA[<p>Ah so Google thought we people on old windows machines or linux without HTML5 support (only adobe flash) were evil hackers when using nohtml5=1.<br />
+Im not sure about this sentence &#8220;When the iframe loads, it will first check if the browser is able to play videos using html5, and if not it will use the Flash fallback. &#8221;</p>
+<p>Old browsers that only support html5 sluggish will probably try to use html5 and never flash.<br />
+That was exactly the reason why so many off these people used the workarounds like /v/ or nohtml5=1.<br />
+Anyway Youtube operated by Google has already spoken the last words:<br />
+&#8220;Flash-embedded videos are no longer supported, but you can still watch this video on YouTube&#8221;</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: Neeraj		</title>
+		<link>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comment-29</link>
+
+		<dc:creator><![CDATA[Neeraj]]></dc:creator>
+		<pubDate>Thu, 14 Sep 2017 16:49:09 +0000</pubDate>
+		<guid isPermaLink="false">/?p=188#comment-29</guid>
+
+					<description><![CDATA[Congrats. Waiting for your Facebook bug poc  :)]]></description>
+			<content:encoded><![CDATA[<p>Congrats. Waiting for your Facebook bug poc  🙂</p>
+]]></content:encoded>
+		
+			</item>
+	</channel>
+</rss>

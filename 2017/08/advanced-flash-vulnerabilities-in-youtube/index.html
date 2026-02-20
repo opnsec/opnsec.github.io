@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en-US" prefix="og: https://ogp.me/ns#">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="profile" href="http://gmpg.org/xfn/11">
+<link rel="pingback" href="/xmlrpc.php">
+
+<title>Advanced Flash Vulnerabilities in Youtube – Part 1 | OpnSec</title>
+<meta name='robots' content='max-image-preview:large'/>
+
+<!-- All In One SEO Pack 3.6.2[280,358] -->
+<script type="application/ld+json" class="aioseop-schema">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"/#organization","url":"/","name":"OpnSec","sameAs":[]},{"@type":"WebSite","@id":"/#website","url":"/","name":"OpnSec","publisher":{"@id":"/#organization"},"potentialAction":{"@type":"SearchAction","target":"/?s={search_term_string}","query-input":"required name=search_term_string"}},{"@type":"WebPage","@id":"/2017/08/advanced-flash-vulnerabilities-in-youtube/#webpage","url":"/2017/08/advanced-flash-vulnerabilities-in-youtube/","inLanguage":"en-US","name":"Advanced Flash Vulnerabilities in Youtube - Part 1","isPartOf":{"@id":"/#website"},"breadcrumb":{"@id":"/2017/08/advanced-flash-vulnerabilities-in-youtube/#breadcrumblist"},"datePublished":"2017-08-25T10:26:45+00:00","dateModified":"2021-07-30T20:07:09+00:00"},{"@type":"Article","@id":"/2017/08/advanced-flash-vulnerabilities-in-youtube/#article","isPartOf":{"@id":"/2017/08/advanced-flash-vulnerabilities-in-youtube/#webpage"},"author":{"@id":"/author/opnsec/#author"},"headline":"Advanced Flash Vulnerabilities in Youtube &#8211; Part 1","datePublished":"2017-08-25T10:26:45+00:00","dateModified":"2021-07-30T20:07:09+00:00","commentCount":7,"mainEntityOfPage":{"@id":"/2017/08/advanced-flash-vulnerabilities-in-youtube/#webpage"},"publisher":{"@id":"/#organization"},"articleSection":"Flash, Flash, Vulnerability, Youtube"},{"@type":"Person","@id":"/author/opnsec/#author","name":"Engue Gillier","sameAs":[],"image":{"@type":"ImageObject","@id":"/#personlogo","url":"https://secure.gravatar.com/avatar/ad925bdf7fba0f9608daa94bb809531a?s=96&d=mm&r=g","width":96,"height":96,"caption":"Engue Gillier"}},{"@type":"BreadcrumbList","@id":"/2017/08/advanced-flash-vulnerabilities-in-youtube/#breadcrumblist","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"WebPage","@id":"/","url":"/","name":"OpnSec"}},{"@type":"ListItem","position":2,"item":{"@type":"WebPage","@id":"/2017/08/advanced-flash-vulnerabilities-in-youtube/","url":"/2017/08/advanced-flash-vulnerabilities-in-youtube/","name":"Advanced Flash Vulnerabilities in Youtube - Part 1"}}]}]}</script>
+<link rel="canonical" href="/2017/08/advanced-flash-vulnerabilities-in-youtube/"/>
+<meta property="og:type" content="article"/>
+<meta property="og:title" content="Advanced Flash Vulnerabilities in Youtube – Part 1 | OpnSec"/>
+<meta property="og:description" content="Why Flash Security still matters? Flash is still an active threat. In 2017, I reported Flash vulnerabilities to Facebook, Youtube, Wordpress, Yahoo, Paypal and Stripe. Over the last 3 years, I reporte"/>
+<meta property="og:url" content="/2017/08/advanced-flash-vulnerabilities-in-youtube/"/>
+<meta property="og:site_name" content="OpnSec"/>
+<meta property="og:image" content="/wp-content/uploads/2017/08/Youtube-Flash-Api-1.png"/>
+<meta property="article:published_time" content="2017-08-25T10:26:45Z"/>
+<meta property="article:modified_time" content="2021-07-30T20:07:09Z"/>
+<meta property="og:image:secure_url" content="/wp-content/uploads/2017/08/Youtube-Flash-Api-1.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:site" content="@opnsec.com"/>
+<meta name="twitter:title" content="Advanced Flash Vulnerabilities in Youtube – Part 1 | OpnSec"/>
+<meta name="twitter:description" content="Why Flash Security still matters? Flash is still an active threat. In 2017, I reported Flash vulnerabilities to Facebook, Youtube, Wordpress, Yahoo, Paypal and Stripe. Over the last 3 years, I reporte"/>
+<meta name="twitter:image" content="/wp-content/uploads/2017/08/Youtube-Flash-Api-1.png"/>
+<!-- All In One SEO Pack -->
+<link rel='dns-prefetch' href='//fonts.googleapis.com'/>
+<link rel='dns-prefetch' href='//s.w.org'/>
+<link rel="alternate" type="application/rss+xml" title="OpnSec &raquo; Feed" href="/feed/"/>
+<link rel="alternate" type="application/rss+xml" title="OpnSec &raquo; Comments Feed" href="/comments/feed/"/>
+<link rel="alternate" type="application/rss+xml" title="OpnSec &raquo; Advanced Flash Vulnerabilities in Youtube &#8211; Part 1 Comments Feed" href="/2017/08/advanced-flash-vulnerabilities-in-youtube/feed/"/>
+<!-- This site uses the Google Analytics by ExactMetrics plugin v6.0.2 - Using Analytics tracking - https://www.exactmetrics.com/ -->
+<script type="text/javascript" data-cfasync="false">var em_version='6.0.2';var em_track_user=true;var em_no_track_reason='';var disableStr='ga-disable-UA-108066765-1';function __gaTrackerIsOptedOut(){return document.cookie.indexOf(disableStr+'=true')>-1;}if(__gaTrackerIsOptedOut()){window[disableStr]=true;}function __gaTrackerOptout(){document.cookie=disableStr+'=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';window[disableStr]=true;}if('undefined'===typeof gaOptout){function gaOptout(){__gaTrackerOptout();}}if(em_track_user){(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','__gaTracker');window.ga=__gaTracker;__gaTracker('create','UA-108066765-1','auto');__gaTracker('set','forceSSL',true);__gaTracker('send','pageview');__gaTracker(function(){window.ga=__gaTracker;});}else{console.log("");(function(){var noopfn=function(){return null;};var noopnullfn=function(){return null;};var Tracker=function(){return null;};var p=Tracker.prototype;p.get=noopfn;p.set=noopfn;p.send=noopfn;var __gaTracker=function(){var len=arguments.length;if(len===0){return;}var f=arguments[len-1];if(typeof f!=='object'||f===null||typeof f.hitCallback!=='function'){console.log('Not running function __gaTracker('+arguments[0]+" ....) because you are not being tracked. "+em_no_track_reason);return;}try{f.hitCallback();}catch(ex){}};__gaTracker.create=function(){return new Tracker();};__gaTracker.getByName=noopnullfn;__gaTracker.getAll=function(){return[];};__gaTracker.remove=noopfn;window['__gaTracker']=__gaTracker;window.ga=__gaTracker;})();}</script>
+<!-- / Google Analytics by ExactMetrics -->
+<script type="text/javascript">window._wpemojiSettings={"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/14.0.0\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/14.0.0\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/opnsec.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=6.0.11"}};!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){var a=String.fromCharCode,e=(p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,e),0,0),i.toDataURL());return p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,t),0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(!p||!p.fillText)return!1;switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])?!1:!s([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!s([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]);case"emoji":return!s([129777,127995,8205,129778,127999],[129777,127995,8203,129778,127999])}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(e=t.source||{}).concatemoji?c(e.concatemoji):e.wpemoji&&e.twemoji&&(c(e.twemoji),c(e.wpemoji)))}(window,document,window._wpemojiSettings);</script>
+<style type="text/css">img.wp-smiley,img.emoji{display:inline!important;border:none!important;box-shadow:none!important;height:1em!important;width:1em!important;margin:0 .07em!important;vertical-align:-.1em!important;background:none!important;padding:0!important}</style>
+	<link rel='stylesheet' id='wp-block-library-css' href='/wp-includes/css/dist/block-library/style.min.css?ver=6.0.11' type='text/css' media='all'/>
+<style id='wp-block-library-inline-css' type='text/css'>.has-text-align-justify{text-align:justify}</style>
+<style id='global-styles-inline-css' type='text/css'>body{--wp--preset--color--black:#000;--wp--preset--color--cyan-bluish-gray:#abb8c3;--wp--preset--color--white:#fff;--wp--preset--color--pale-pink:#f78da7;--wp--preset--color--vivid-red:#cf2e2e;--wp--preset--color--luminous-vivid-orange:#ff6900;--wp--preset--color--luminous-vivid-amber:#fcb900;--wp--preset--color--light-green-cyan:#7bdcb5;--wp--preset--color--vivid-green-cyan:#00d084;--wp--preset--color--pale-cyan-blue:#8ed1fc;--wp--preset--color--vivid-cyan-blue:#0693e3;--wp--preset--color--vivid-purple:#9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple:linear-gradient(135deg,rgba(6,147,227,1) 0%,#9b51e0 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan:linear-gradient(135deg,#7adcb4 0%,#00d082 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange:linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red:linear-gradient(135deg,rgba(255,105,0,1) 0%,#cf2e2e 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray:linear-gradient(135deg,#eee 0%,#a9b8c3 100%);--wp--preset--gradient--cool-to-warm-spectrum:linear-gradient(135deg,#4aeadc 0%,#9778d1 20%,#cf2aba 40%,#ee2c82 60%,#fb6962 80%,#fef84c 100%);--wp--preset--gradient--blush-light-purple:linear-gradient(135deg,#ffceec 0%,#9896f0 100%);--wp--preset--gradient--blush-bordeaux:linear-gradient(135deg,#fecda5 0%,#fe2d2d 50%,#6b003e 100%);--wp--preset--gradient--luminous-dusk:linear-gradient(135deg,#ffcb70 0%,#c751c0 50%,#4158d0 100%);--wp--preset--gradient--pale-ocean:linear-gradient(135deg,#fff5cb 0%,#b6e3d4 50%,#33a7b5 100%);--wp--preset--gradient--electric-grass:linear-gradient(135deg,#caf880 0%,#71ce7e 100%);--wp--preset--gradient--midnight:linear-gradient(135deg,#020381 0%,#2874fc 100%);--wp--preset--duotone--dark-grayscale:url(#wp-duotone-dark-grayscale);--wp--preset--duotone--grayscale:url(#wp-duotone-grayscale);--wp--preset--duotone--purple-yellow:url(#wp-duotone-purple-yellow);--wp--preset--duotone--blue-red:url(#wp-duotone-blue-red);--wp--preset--duotone--midnight:url(#wp-duotone-midnight);--wp--preset--duotone--magenta-yellow:url(#wp-duotone-magenta-yellow);--wp--preset--duotone--purple-green:url(#wp-duotone-purple-green);--wp--preset--duotone--blue-orange:url(#wp-duotone-blue-orange);--wp--preset--font-size--small:13px;--wp--preset--font-size--medium:20px;--wp--preset--font-size--large:36px;--wp--preset--font-size--x-large:42px}.has-black-color{color:var(--wp--preset--color--black)!important}.has-cyan-bluish-gray-color{color:var(--wp--preset--color--cyan-bluish-gray)!important}.has-white-color{color:var(--wp--preset--color--white)!important}.has-pale-pink-color{color:var(--wp--preset--color--pale-pink)!important}.has-vivid-red-color{color:var(--wp--preset--color--vivid-red)!important}.has-luminous-vivid-orange-color{color:var(--wp--preset--color--luminous-vivid-orange)!important}.has-luminous-vivid-amber-color{color:var(--wp--preset--color--luminous-vivid-amber)!important}.has-light-green-cyan-color{color:var(--wp--preset--color--light-green-cyan)!important}.has-vivid-green-cyan-color{color:var(--wp--preset--color--vivid-green-cyan)!important}.has-pale-cyan-blue-color{color:var(--wp--preset--color--pale-cyan-blue)!important}.has-vivid-cyan-blue-color{color:var(--wp--preset--color--vivid-cyan-blue)!important}.has-vivid-purple-color{color:var(--wp--preset--color--vivid-purple)!important}.has-black-background-color{background-color:var(--wp--preset--color--black)!important}.has-cyan-bluish-gray-background-color{background-color:var(--wp--preset--color--cyan-bluish-gray)!important}.has-white-background-color{background-color:var(--wp--preset--color--white)!important}.has-pale-pink-background-color{background-color:var(--wp--preset--color--pale-pink)!important}.has-vivid-red-background-color{background-color:var(--wp--preset--color--vivid-red)!important}.has-luminous-vivid-orange-background-color{background-color:var(--wp--preset--color--luminous-vivid-orange)!important}.has-luminous-vivid-amber-background-color{background-color:var(--wp--preset--color--luminous-vivid-amber)!important}.has-light-green-cyan-background-color{background-color:var(--wp--preset--color--light-green-cyan)!important}.has-vivid-green-cyan-background-color{background-color:var(--wp--preset--color--vivid-green-cyan)!important}.has-pale-cyan-blue-background-color{background-color:var(--wp--preset--color--pale-cyan-blue)!important}.has-vivid-cyan-blue-background-color{background-color:var(--wp--preset--color--vivid-cyan-blue)!important}.has-vivid-purple-background-color{background-color:var(--wp--preset--color--vivid-purple)!important}.has-black-border-color{border-color:var(--wp--preset--color--black)!important}.has-cyan-bluish-gray-border-color{border-color:var(--wp--preset--color--cyan-bluish-gray)!important}.has-white-border-color{border-color:var(--wp--preset--color--white)!important}.has-pale-pink-border-color{border-color:var(--wp--preset--color--pale-pink)!important}.has-vivid-red-border-color{border-color:var(--wp--preset--color--vivid-red)!important}.has-luminous-vivid-orange-border-color{border-color:var(--wp--preset--color--luminous-vivid-orange)!important}.has-luminous-vivid-amber-border-color{border-color:var(--wp--preset--color--luminous-vivid-amber)!important}.has-light-green-cyan-border-color{border-color:var(--wp--preset--color--light-green-cyan)!important}.has-vivid-green-cyan-border-color{border-color:var(--wp--preset--color--vivid-green-cyan)!important}.has-pale-cyan-blue-border-color{border-color:var(--wp--preset--color--pale-cyan-blue)!important}.has-vivid-cyan-blue-border-color{border-color:var(--wp--preset--color--vivid-cyan-blue)!important}.has-vivid-purple-border-color{border-color:var(--wp--preset--color--vivid-purple)!important}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background:var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple)!important}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background:var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan)!important}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background:var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange)!important}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background:var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red)!important}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background:var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray)!important}.has-cool-to-warm-spectrum-gradient-background{background:var(--wp--preset--gradient--cool-to-warm-spectrum)!important}.has-blush-light-purple-gradient-background{background:var(--wp--preset--gradient--blush-light-purple)!important}.has-blush-bordeaux-gradient-background{background:var(--wp--preset--gradient--blush-bordeaux)!important}.has-luminous-dusk-gradient-background{background:var(--wp--preset--gradient--luminous-dusk)!important}.has-pale-ocean-gradient-background{background:var(--wp--preset--gradient--pale-ocean)!important}.has-electric-grass-gradient-background{background:var(--wp--preset--gradient--electric-grass)!important}.has-midnight-gradient-background{background:var(--wp--preset--gradient--midnight)!important}.has-small-font-size{font-size:var(--wp--preset--font-size--small)!important}.has-medium-font-size{font-size:var(--wp--preset--font-size--medium)!important}.has-large-font-size{font-size:var(--wp--preset--font-size--large)!important}.has-x-large-font-size{font-size:var(--wp--preset--font-size--x-large)!important}</style>
+<link rel='stylesheet' id='google_fonts-css' href='//fonts.googleapis.com/css?family=Lato:300,400,700|Raleway:400,300,700' type='text/css' media='all'/>
+<link rel='stylesheet' id='font-awesome-css' href='/wp-content/themes/flat-bootstrap/font-awesome/css/font-awesome.min.css?ver=4.5.0' type='text/css' media='all'/>
+<link rel='stylesheet' id='bootstrap-css' href='/wp-content/themes/flat-bootstrap/bootstrap/css/bootstrap.min.css?ver=3.3.6' type='text/css' media='all'/>
+<link rel='stylesheet' id='theme-base-css' href='/wp-content/themes/flat-bootstrap/css/theme-base.css?ver=20160323' type='text/css' media='all'/>
+<link rel='stylesheet' id='theme-flat-css' href='/wp-content/themes/flat-bootstrap/css/theme-flat.css?ver=20160323' type='text/css' media='all'/>
+<link rel='stylesheet' id='flat-bootstrap-css' href='/wp-content/themes/flat-bootstrap/style.css?ver=6.0.11' type='text/css' media='all'/>
+<link rel='stylesheet' id='jetpack_css-css' href='/wp-content/plugins/jetpack/css/jetpack.css?ver=8.5.3' type='text/css' media='all'/>
+<script type='text/javascript' id='exactmetrics-frontend-script-js-extra'>//<![CDATA[
+var exactmetrics_frontend={"js_events_tracking":"true","download_extensions":"zip,mp3,mpeg,pdf,docx,pptx,xlsx,rar","inbound_paths":"[{\"path\":\"\\\/go\\\/\",\"label\":\"affiliate\"},{\"path\":\"\\\/recommend\\\/\",\"label\":\"affiliate\"}]","home_url":"https:\/\/opnsec.com","hash_tracking":"false"};
+//]]></script>
+<script type='text/javascript' src='/wp-content/plugins/google-analytics-dashboard-for-wp/assets/js/frontend.min.js?ver=6.0.2' id='exactmetrics-frontend-script-js'></script>
+<script type='text/javascript' src='/wp-includes/js/jquery/jquery.min.js?ver=3.6.0' id='jquery-core-js'></script>
+<script type='text/javascript' src='/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.3.2' id='jquery-migrate-js'></script>
+<link rel="https://api.w.org/" href="/wp-json/"/><link rel="alternate" type="application/json" href="/wp-json/wp/v2/posts/8"/><link rel="EditURI" type="application/rsd+xml" title="RSD" href="/xmlrpc.php?rsd"/>
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="/wp-includes/wlwmanifest.xml"/> 
+<meta name="generator" content="WordPress 6.0.11"/>
+<link rel='shortlink' href='/?p=8'/>
+<link rel="alternate" type="application/json+oembed" href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fopnsec.com%2F2017%2F08%2Fadvanced-flash-vulnerabilities-in-youtube%2F"/>
+<link rel="alternate" type="text/xml+oembed" href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fopnsec.com%2F2017%2F08%2Fadvanced-flash-vulnerabilities-in-youtube%2F&#038;format=xml"/>
+<style>.post-thumbnail img[src$=".svg"]{width:100%;height:auto}</style><style type='text/css'>img#wpstats{display:none}</style><style type="text/css">.recentcomments a{display:inline!important;padding:0!important;margin:0!important}</style>	<style type="text/css">.site-title a,.site-description{color:#16a085}.site-title a:hover,.site-title a:active,.site-title a:focus{opacity:.75}.navbar-brand{position:absolute;clip:rect(1px,1px,1px,1px)}</style>
+	<meta name="twitter:widgets:link-color" content="#000000"><meta name="twitter:widgets:border-color" content="#000000"><meta name="twitter:partner" content="tfwp"><link rel="icon" href="/wp-content/uploads/2017/08/cropped-opnsec-32x32.png" sizes="32x32"/>
+<link rel="icon" href="/wp-content/uploads/2017/08/cropped-opnsec-192x192.png" sizes="192x192"/>
+<link rel="apple-touch-icon" href="/wp-content/uploads/2017/08/cropped-opnsec-180x180.png"/>
+<meta name="msapplication-TileImage" content="/wp-content/uploads/2017/08/cropped-opnsec-270x270.png"/>
+
+
+</head>
+
+<body class="post-template-default single single-post postid-8 single-format-standard">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0" focusable="false" role="none" style="visibility: hidden; position: absolute; left: -9999px; overflow: hidden;"><defs><filter id="wp-duotone-dark-grayscale"><feColorMatrix color-interpolation-filters="sRGB" type="matrix" values=" .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 "/><feComponentTransfer color-interpolation-filters="sRGB"><feFuncR type="table" tableValues="0 0.49803921568627"/><feFuncG type="table" tableValues="0 0.49803921568627"/><feFuncB type="table" tableValues="0 0.49803921568627"/><feFuncA type="table" tableValues="1 1"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/></filter></defs></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0" focusable="false" role="none" style="visibility: hidden; position: absolute; left: -9999px; overflow: hidden;"><defs><filter id="wp-duotone-grayscale"><feColorMatrix color-interpolation-filters="sRGB" type="matrix" values=" .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 "/><feComponentTransfer color-interpolation-filters="sRGB"><feFuncR type="table" tableValues="0 1"/><feFuncG type="table" tableValues="0 1"/><feFuncB type="table" tableValues="0 1"/><feFuncA type="table" tableValues="1 1"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/></filter></defs></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0" focusable="false" role="none" style="visibility: hidden; position: absolute; left: -9999px; overflow: hidden;"><defs><filter id="wp-duotone-purple-yellow"><feColorMatrix color-interpolation-filters="sRGB" type="matrix" values=" .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 "/><feComponentTransfer color-interpolation-filters="sRGB"><feFuncR type="table" tableValues="0.54901960784314 0.98823529411765"/><feFuncG type="table" tableValues="0 1"/><feFuncB type="table" tableValues="0.71764705882353 0.25490196078431"/><feFuncA type="table" tableValues="1 1"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/></filter></defs></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0" focusable="false" role="none" style="visibility: hidden; position: absolute; left: -9999px; overflow: hidden;"><defs><filter id="wp-duotone-blue-red"><feColorMatrix color-interpolation-filters="sRGB" type="matrix" values=" .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 "/><feComponentTransfer color-interpolation-filters="sRGB"><feFuncR type="table" tableValues="0 1"/><feFuncG type="table" tableValues="0 0.27843137254902"/><feFuncB type="table" tableValues="0.5921568627451 0.27843137254902"/><feFuncA type="table" tableValues="1 1"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/></filter></defs></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0" focusable="false" role="none" style="visibility: hidden; position: absolute; left: -9999px; overflow: hidden;"><defs><filter id="wp-duotone-midnight"><feColorMatrix color-interpolation-filters="sRGB" type="matrix" values=" .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 "/><feComponentTransfer color-interpolation-filters="sRGB"><feFuncR type="table" tableValues="0 0"/><feFuncG type="table" tableValues="0 0.64705882352941"/><feFuncB type="table" tableValues="0 1"/><feFuncA type="table" tableValues="1 1"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/></filter></defs></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0" focusable="false" role="none" style="visibility: hidden; position: absolute; left: -9999px; overflow: hidden;"><defs><filter id="wp-duotone-magenta-yellow"><feColorMatrix color-interpolation-filters="sRGB" type="matrix" values=" .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 "/><feComponentTransfer color-interpolation-filters="sRGB"><feFuncR type="table" tableValues="0.78039215686275 1"/><feFuncG type="table" tableValues="0 0.94901960784314"/><feFuncB type="table" tableValues="0.35294117647059 0.47058823529412"/><feFuncA type="table" tableValues="1 1"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/></filter></defs></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0" focusable="false" role="none" style="visibility: hidden; position: absolute; left: -9999px; overflow: hidden;"><defs><filter id="wp-duotone-purple-green"><feColorMatrix color-interpolation-filters="sRGB" type="matrix" values=" .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 "/><feComponentTransfer color-interpolation-filters="sRGB"><feFuncR type="table" tableValues="0.65098039215686 0.40392156862745"/><feFuncG type="table" tableValues="0 1"/><feFuncB type="table" tableValues="0.44705882352941 0.4"/><feFuncA type="table" tableValues="1 1"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/></filter></defs></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0" focusable="false" role="none" style="visibility: hidden; position: absolute; left: -9999px; overflow: hidden;"><defs><filter id="wp-duotone-blue-orange"><feColorMatrix color-interpolation-filters="sRGB" type="matrix" values=" .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 .299 .587 .114 0 0 "/><feComponentTransfer color-interpolation-filters="sRGB"><feFuncR type="table" tableValues="0.098039215686275 1"/><feFuncG type="table" tableValues="0 0.66274509803922"/><feFuncB type="table" tableValues="0.84705882352941 0.41960784313725"/><feFuncA type="table" tableValues="1 1"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/></filter></defs></svg><div id="page" class="hfeed site">
+
+		
+	<header id="masthead" class="site-header" role="banner">
+
+					<div id="site-branding" class="site-branding">
+			
+							<div class="container">
+                                <div class="site-branding-text">
+				<h1 class="site-title"><a href="/" rel="home">OpnSec</a></h1>
+				<h2 class="site-description">Open mind Security and Crypto!</h2>
+				</div>
+				</div>
+						</div><!-- .site-branding -->
+
+					
+
+			
+		<nav id="site-navigation" class="main-navigation" role="navigation">
+
+			<h2 class="menu-toggle screen-reader-text sr-only ">Primary Menu</h2>
+			<div class="skip-link"><a class="screen-reader-text sr-only" href="#content">Skip to content</a></div>
+
+		<div class="navbar navbar-default navbar-static-top"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a class="navbar-brand" href="/" rel="home">OpnSec</a></div><!-- navbar-header --><div class="navbar-collapse collapse"><div class="menu-test-container"><ul id="menu-test" class="nav navbar-nav"><li id="menu-item-313" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-313"><a title="About Me" href="/about-me/">About Me</a></li>
+</ul></div>
+		</div><!-- .container -->
+		</div><!-- .navbar -->
+		</nav><!-- #site-navigation -->
+
+	</header><!-- #masthead -->
+
+		
+	<div id="content" class="site-content">
+
+
+
+			<header class="content-header">
+		<div class="container">
+		<h1 class="page-title">Advanced Flash Vulnerabilities in Youtube &#8211; Part 1</h1>
+				</div>
+		</header>
+
+	
+
+<a id="pagetop"></a>
+
+
+
+<div class="container">
+<div id="main-grid" class="row">
+
+	<div id="primary" class="content-area col-md-8">
+		<main id="main" class="site-main" role="main">
+
+		
+			
+<article id="post-8" class="post-8 post type-post status-publish format-standard hentry category-flash tag-flash tag-vulnerability tag-youtube">
+
+	
+<header class="entry-header">
+	<div class="entry-meta">
+	
+		
+		
+						<p><span class="posted-on"><span class="glyphicon glyphicon-calendar"></span>&nbsp;
+			August 25, 2017 
+			</span>
+	
+			
+		
+					 &nbsp;|&nbsp;<span class="comments-link">
+			 <span class="glyphicon glyphicon-comment"></span>&nbsp;
+			 <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/#comments" class="smoothscroll">7 Comments</a>			 </span>
+		
+				
+	</div><!-- .entry-meta -->
+</header><!-- .entry-header -->
+	
+	<div id="xsbf-entry-content" class="entry-content">
+		<h3>Why Flash Security still matters?</h3>
+<p><img class="alignnone wp-image-147 size-medium" style="display: none;" src="/wp-content/uploads/2017/08/Youtube-Flash-Api-1.png" alt="" width="1" height="1"/>Flash is still an active threat. In 2017, I reported Flash vulnerabilities to Facebook, Youtube, WordPress, Yahoo, Paypal and Stripe. Over the last 3 years, I reported more than 50 Flash vulnerabilities to Bug Bounty programs. And there are many more I didn&#8217;t have the time to report or that weren&#8217;t fixed after I reported it.</p>
+<p><img loading="lazy" class="size-medium wp-image-73 aligncenter" src="/wp-content/uploads/2017/08/1uureg-300x184.jpg" alt="" width="300" height="184" srcset="/wp-content/uploads/2017/08/1uureg-300x184.jpg 300w, /wp-content/uploads/2017/08/1uureg.jpg 450w" sizes="(max-width: 300px) 100vw, 300px"/><br/>
+In addition, Flash has been replaced by new javascript/html5 features. These features introduce complexity and new kind of vulnerabilities like bad CORS implementation, DOM XSSes triggered by postMessage or XHR requests, active mixed content&#8230; Learning from Flash mistakes can help design and implement more secure javascript applications. The new Youtube html5 Api is mostly a porting of the Youtube Flash Api to javascript, making it interesting to study. In fact, I was able to find XSSes in the Youtube html5 Api using my knowledge of the Flash Api.<br/>
+I&#8217;ll explain some advanced Flash vulnerabilities I found in Youtube Flash Api and in the process I will draw a parallel with html/javascript security. This is quite technical so feel free to comment or to tweet me (<a href="https://twitter.com/opnsec" target="_blank" rel="noopener noreferrer">@opnsec</a>) if something is not clear or if you want to add something. You can also read more about Flash security model <a href="http://www.senocular.com/flash/tutorials/contentdomains/" target="_blank" rel="noopener noreferrer">here</a>.</p>
+<h2>Reverse engineering Youtube Flash Api</h2>
+<p>Youtube Flash Api allows developers to embed a Youtube video in an external website.<br/>
+Here is the workflow of the Api:</p>
+<p><a href="/wp-content/uploads/2017/08/Diagramme1.svg" target="_blank" rel="noopener noreferrer"><img loading="lazy" class="aligncenter wp-image-11" src="/wp-content/uploads/2017/08/Diagramme1.svg" alt="" width="982" height="468"/></a></p>
+<p>The entry point, Youtube Wrapper, is a Flash file located at youtube.com/v/[VIDEO_ID], it is just a wrapper between the HTML page and the Main App.<br/>
+The Main Application is a large flash file of about 100k LoC and is located in a sandboxed domain s.ytimg.com.<br/>
+The Modules handle optional functions like subtitles or advertisements. They are not stand-alone Flash files and can only be loaded by the Main App.</p>
+<p>In addition there is a Flash to Javascript Api that allows the html page to send commands to the Youtube Api like play(), pause(), etc&#8230; Flash files will also perform &#8220;ajax style&#8221; cross-domain requests to load configuration files and video data.</p>
+<h2>I. User info leakage</h2>
+<p>Let&#8217;s start with a simple vulnerability. Here is a simplified version of Youtube Wrapper code in Flash ActionScript3 (AS3) :</p>
+<pre><code>public class YoutubeWrapper extends Sprite{</p>
+<p>private var user_name = "The Victim";<br/>
+private var user_picture = "https://googleusercontent.com/.../victim_photo.jpg";<br/>
+private var appLoader = new Loader();</p>
+<p>public function YoutubeWrapper(){<br/>
+// allow external javascript/Flash files to access its public properties<br/>
+Security.allowDomain("*");<br/>
+// load the Main App<br/>
+this.appLoader .load(new URLRequest("https://s.ytimg.com/.../watch_as3.swf");<br/>
+// add as child of display container<br/>
+this.addChild(this.appLoader );<br/>
+// loaderInfo.sharedEvents Api<br/>
+this.loader.contentLoaderInfo.sharedEvents<br/>
+.addEventListener("REQUEST_USERINFO", this.onRequestUserinfo);<br/>
+}<br/>
+private function onRequestUserinfo(event:Event){<br/>
+// write the user info into the event.data property<br/>
+// which is accessible to the sharedEvents caller<br/>
+event.data.user_name = this.user_name;<br/>
+event.data.user_image = this.user_image;<br/>
+}<br/>
+}</code></pre>
+<p>Youtube Wrapper is generated on the fly and its property &#8220;user_name&#8221; contains the Google user name (if he is connected to Google). The property &#8220;user_picture&#8221; contains the link to the user profile picture. In this bug, the attacker will steal these values.</p>
+<p>Youtube Wrapper can be loaded from the developer own Flash file (let&#8217;s call it Evil Wrapper). In that case, they both executes in a different Flash security sandbox.</p>
+<blockquote><p>Loading an external Flash file in Flash is a little bit similar to loading an &lt;iframe&gt; in html. If the iframe is from a different origin than its parent, they cannot access each other properties due to the Same-Origin Policy (SOP)</p></blockquote>
+<p>Youtube Wrapper contains the code <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/system/Security.html#allowDomain()" target="_blank" rel="noopener noreferrer">Security.allowDomain(&#8220;*&#8221;)</a> to allow javascript on the hosting webpage to send commands to the Flash app like play(), pause(),etc&#8230; This also means that Evil Wrapper can access any public property of Youtube Wrapper as if it was in the same Security sandbox. However it cannot access private properties.</p>
+<p>The user_name property is private so Evil Wrapper cannot access it.</p>
+<p>Flash also provides an Api for communication between a Loader and a loaded file using <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/LoaderInfo.html#sharedEvents" target="_blank" rel="noopener noreferrer">loaderInfo.sharedEvents</a>. Youtube Wrapper uses this api to communicate with the Main App. When the Main App dispatches an event to the sharedEvents Api, the Youtube Wrapper receives the event and send back the user info using the event.data property.<br/>
+loaderInfo.sharedEvents is not only accessible to the loader and the loaded files, but also to any Flash file that has a reference to this loaderInfo object.</p>
+<blockquote><p>This is similar to the javascript <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage" target="_blank" rel="noopener noreferrer">postMessage Api </a>which allows communication between cross-domain iframes. The postMessage Api is accessible not only to the iframe and its parent but also to any other window that has a reference to the iframe or the parent. Any arbitrary domain can access these references using window.open and window.frames, which are not restricted by the SOP.</p></blockquote>
+<p>If Evil loader can access this particular loaderInfo object it will be able to send an event to the Youtube Wrapper and steal the user info.<br/>
+loaderInfo is a property of appLoader which is a private property of the Youtube Wrapper, so Evil Wrapper cannot access it.</p>
+<p>However, when using a Loader, if you want to display the loaded file, you have to add it as a child of the Display Container. This is usually done using<br/>
+this.<a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/DisplayObjectContainer.html#addChild()" target="_blank" rel="noopener noreferrer">addChild</a>(this.loader); and this is exactly what the Youtube Wrapper does.<br/>
+The thing is that the Youtube Wrapper also have a built-in public method <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/DisplayObjectContainer.html#getChildAt()" target="_blank" rel="noopener noreferrer">getChildAt</a>() that will return the children of the Youtube Wrapper. This means that Evil Wrapper can call YoutubeWrapper.getChildAt(0) which will return the loader object, bypassing the privacy of the loader property.</p>
+<blockquote><p>Setting a property as &#8220;private&#8221; is called <a href="https://en.wikipedia.org/wiki/Encapsulation_(computer_programming)" target="_blank" rel="noopener noreferrer">encapsulation</a>. However, only the reference is private, not the object the reference points to.</p></blockquote>
+<p>From there Evil Wrapper can access YoutubeWrapper.getChildAt(0).loaderInfo.sharedEvents which is the interface between Youtube Wrapper and the Main App. Evil Wrapper can send an event to the Youtube Wrapper, the Youtube Wrapper will provide the user info in the event.data property and Evil Wrapper can then read the event.data value.<br/>
+Proof of Concept :</p>
+<p>Evil Wrapper code was like this</p>
+<pre><code>var loader = new Loader();<br/>
+// Load the Youtube Wrapper<br/>
+loader.load(new URLRequest("https://www.youtube.com/v/[VIDEO_ID]"));<br/>
+var youtubeWrapper = loader.content;<br/>
+// Access the Youtube Wrapper appLoader object<br/>
+var appLoader = youtubeWrapper.getChildAt(0);<br/>
+// Access the loaderInfo.sharedEvents of appLoader<br/>
+var LeakingSharedEvents = appLoader.contentLoaderInfo.sharedEvents;</p>
+<p>// Prepare the event to send to Youtube Wrapper<br/>
+var leakEvent = new Event("Request_username");<br/>
+leakEvent.data = new Object();<br/>
+// Send the leakEvent to the LeakingSharedEvents<br/>
+LeakingSharedEvents.dispatchEvent(leakEvent);</p>
+<p>// The username is now accessible in the event.data property<br/>
+trace(leakEvent.data.user_name);<br/>
+trace(leakEvent.data.user_picture);</code></pre>
+<p>POC workflow :</p>
+<p><img loading="lazy" class="wp-image-40 aligncenter" src="/wp-content/uploads/2017/08/Diagramme2.svg" alt="" width="800" height="287"/><br/>
+Attack scenario:<br/>
+Prerequisite: The victim is logged in Google and have Flash player<br/>
+(1) The victim visits the attacker webpage evil.com/evil.html which contains a Flash object evil.com/evil.swf<br/>
+(2) evil.swf loads Youtube wrapper (https://www.youtube.com/v/[VIDEO_ID]) and retrieves the user Google username (4-5-6)<br/>
+evil.com now knows the username of it&#8217;s visitors. In addition, as the profile picture link is unique, it is possible to uniquely identify the user&#8217;s Google account.</p>
+<p>Impact:<br/>
+Any website could use this to know the identity of it&#8217;s users, if they are connected to Google. Imagine how you would feel if you visit a random website and this website displays your name and your picture!</p>
+<p>Mitigation:<br/>
+To resolve this issue, Youtube Wrapper stopped writing the user info in the event.data property and instead sends it directly to the Main App. That way even if Evil Wrapper sends an event to Youtube Wrapper, it wouldn&#8217;t receive the user info as it would be directly sent to the Main App.</p>
+<p>Timeline:<br/>
+08/27/2015 &#8211; reported to Google VRP<br/>
+09/09/2015 &#8211; issue fixed and reward <img loading="lazy" class="alignnone wp-image-44 size-full" src="/wp-content/uploads/2017/08/1-star.png" alt="" width="60" height="14"/><br/>
+This was a simple bug and I hope it helps you understand the basic challenges here. You can read about another bug where we actually execute arbitrary Flash code in youtube.com in <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube-part-2/"><strong>Part 2</strong></a>.</p>
+<div id="xsbf-after-content" class="after-content">
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fopnsec.com%2F2017%2F08%2Fadvanced-flash-vulnerabilities-in-youtube%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+</div><!-- .after-content -->		
+		
+
+	<footer class="entry-meta">
+
+					 
+							<span class="cat-links"><span class="glyphicon glyphicon-tag"></span>&nbsp;
+				<a href="/category/flash/" rel="category tag">Flash</a>				</span>
+					
+		<span class="tags-links"><span class="glyphicon glyphicon-tags"></span> &nbsp;<a href="/tag/flash/" rel="tag">Flash</a>, <a href="/tag/vulnerability/" rel="tag">Vulnerability</a>, <a href="/tag/youtube/" rel="tag">Youtube</a></span> 
+
+				
+	</footer><!-- .entry-meta -->
+
+
+
+		
+		
+	</div><!-- .entry-content -->
+
+</article><!-- #post-## -->
+
+			
+<div id="comments" class="comments-area">
+
+	
+			<h2 class="comments-title">
+			7 comments on &ldquo;<span>Advanced Flash Vulnerabilities in Youtube &#8211; Part 1</span>&rdquo;		</h2>
+
+		
+		<ul class="comment-list">
+			
+	<li id="comment-15" class="comment even thread-even depth-1 parent">
+		<article id="div-comment-15" class="comment-body">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt='' src='https://secure.gravatar.com/avatar/5684ef18c6e0468fd3a8d3e5f80bbbdf?s=60&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/5684ef18c6e0468fd3a8d3e5f80bbbdf?s=120&#038;d=mm&#038;r=g 2x' class='avatar avatar-60 thumbnail photo' height='60' width='60' loading='lazy'/>					<cite class="fn">subramanya sai</cite> <span class="says">says:</span>				</div><!-- .comment-author -->
+
+				<div class="comment-metadata">
+					<a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/#comment-15">
+						<time datetime="2017-09-04T18:35:11+00:00">
+							September 4, 2017 at 6:35 pm						</time>
+					</a>
+									</div><!-- .comment-metadata -->
+
+							</footer><!-- .comment-meta -->
+
+			<div class="comment-content">
+				<p>Good article with #POC on the Flash vulnerabilities!! Where could the other vulnerability #POCS for face-book,stripe,paypal etc mentioned in article be found and what are best sources to refer subject to flash pen- testing??</p>
+			</div><!-- .comment-content -->
+
+					</article><!-- .comment-body -->
+
+	<ul class="children">
+
+	<li id="comment-18" class="comment byuser comment-author-opnsec bypostauthor odd alt depth-2">
+		<article id="div-comment-18" class="comment-body">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt='' src='https://secure.gravatar.com/avatar/ad925bdf7fba0f9608daa94bb809531a?s=60&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/ad925bdf7fba0f9608daa94bb809531a?s=120&#038;d=mm&#038;r=g 2x' class='avatar avatar-60 thumbnail photo' height='60' width='60' loading='lazy'/>					<cite class="fn"><a href='' rel='external nofollow ugc' class='url'>Engue Gillier</a></cite> <span class="says">says:</span>				</div><!-- .comment-author -->
+
+				<div class="comment-metadata">
+					<a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/#comment-18">
+						<time datetime="2017-09-05T07:05:31+00:00">
+							September 5, 2017 at 7:05 am						</time>
+					</a>
+									</div><!-- .comment-metadata -->
+
+							</footer><!-- .comment-meta -->
+
+			<div class="comment-content">
+				<p>Thank you for your questions. I didn&#8217;t publish many write-ups yet. There is a public bug report for Vimeo at <a href="https://hackerone.com/reports/136481" rel="nofollow ugc">https://hackerone.com/reports/136481</a> and I will disclose some of my findings on Facebook soon.<br/>
+Regarding Flash pentesting, here are the main resources I use :<br/>
+&#8211; Decompilation tools : <a href="http://www.sothink.com/product/flashdecompiler/" rel="nofollow ugc">Sothink SWF Decompiler</a>, <a href="https://www.free-decompiler.com/flash/" rel="nofollow ugc">JPEXS Free Flash Decompiler</a>, <a href="https://www.as3sorcerer.com/" rel="nofollow ugc">AS3 Sorcerer</a><br/>
+&#8211; Flash security docs : <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/" rel="nofollow ugc">Official Doc</a>, <a href="http://www.senocular.com/flash/tutorials/contentdomains/" rel="nofollow ugc">Security Domains</a>, <a href="https://www.owasp.org/index.php/Testing_for_Cross_site_flashing_(OTG-CLIENT-008)" rel="nofollow ugc">OWASP Cross Site Flashing</a><br/>
+&#8211; Write-ups: <a href="https://olivierbeg.com/finding-xss-vulnerabilities-in-flash-files/" rel="nofollow ugc">Finding XSS vulnerabilities in flash files</a>, <a href="https://nealpoole.com/blog/2012/05/xss-and-csrf-via-swf-applets-swfupload-plupload/" rel="nofollow ugc">XSS and CSRF via SWF</a>, <a href="https://gist.github.com/cure53/df34ea68c26441f3ae98f821ba1feb9c" rel="nofollow ugc">WordPress Flash XSS</a><br/>
+Happy hunting!</p>
+			</div><!-- .comment-content -->
+
+					</article><!-- .comment-body -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+
+	<li id="comment-28" class="comment even thread-odd thread-alt depth-1">
+		<article id="div-comment-28" class="comment-body">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt='' src='https://secure.gravatar.com/avatar/a08dea5fa9e317e8a3bb790946f8ea87?s=60&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/a08dea5fa9e317e8a3bb790946f8ea87?s=120&#038;d=mm&#038;r=g 2x' class='avatar avatar-60 thumbnail photo' height='60' width='60' loading='lazy'/>					<cite class="fn">reeseXmoonstar88</cite> <span class="says">says:</span>				</div><!-- .comment-author -->
+
+				<div class="comment-metadata">
+					<a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/#comment-28">
+						<time datetime="2017-09-13T18:24:51+00:00">
+							September 13, 2017 at 6:24 pm						</time>
+					</a>
+									</div><!-- .comment-metadata -->
+
+							</footer><!-- .comment-meta -->
+
+			<div class="comment-content">
+				<p>Man!!!! Best write-up so far!!!</p>
+			</div><!-- .comment-content -->
+
+					</article><!-- .comment-body -->
+
+	</li><!-- #comment-## -->
+
+	<li id="comment-32" class="comment odd alt thread-even depth-1">
+		<article id="div-comment-32" class="comment-body">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt='' src='https://secure.gravatar.com/avatar/7102d48c9ec42c3031525cc193ad5481?s=60&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/7102d48c9ec42c3031525cc193ad5481?s=120&#038;d=mm&#038;r=g 2x' class='avatar avatar-60 thumbnail photo' height='60' width='60' loading='lazy'/>					<cite class="fn">Gopal Singh</cite> <span class="says">says:</span>				</div><!-- .comment-author -->
+
+				<div class="comment-metadata">
+					<a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/#comment-32">
+						<time datetime="2017-09-15T13:09:51+00:00">
+							September 15, 2017 at 1:09 pm						</time>
+					</a>
+									</div><!-- .comment-metadata -->
+
+							</footer><!-- .comment-meta -->
+
+			<div class="comment-content">
+				<p>I am still waiting for your Write-up on the facebook stored XSS bug i hope you write it soon</p>
+			</div><!-- .comment-content -->
+
+					</article><!-- .comment-body -->
+
+	</li><!-- #comment-## -->
+
+	<li id="comment-49" class="comment even thread-odd thread-alt depth-1 parent">
+		<article id="div-comment-49" class="comment-body">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt='' src='https://secure.gravatar.com/avatar/7c64864b4d212b0bc77052b89ab7fc02?s=60&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/7c64864b4d212b0bc77052b89ab7fc02?s=120&#038;d=mm&#038;r=g 2x' class='avatar avatar-60 thumbnail photo' height='60' width='60' loading='lazy'/>					<cite class="fn">nick</cite> <span class="says">says:</span>				</div><!-- .comment-author -->
+
+				<div class="comment-metadata">
+					<a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/#comment-49">
+						<time datetime="2017-10-03T07:19:06+00:00">
+							October 3, 2017 at 7:19 am						</time>
+					</a>
+									</div><!-- .comment-metadata -->
+
+							</footer><!-- .comment-meta -->
+
+			<div class="comment-content">
+				<p>Thank you for great article 🙂</p>
+<p>I&#8217;m wondering &#8230;  how to find Youtube Flash api flow ?<br/>
+I think you did reverse engineering. but what do I have to do  to know all about the api flow like you ?  😛</p>
+			</div><!-- .comment-content -->
+
+					</article><!-- .comment-body -->
+
+	<ul class="children">
+
+	<li id="comment-51" class="comment byuser comment-author-opnsec bypostauthor odd alt depth-2 parent">
+		<article id="div-comment-51" class="comment-body">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt='' src='https://secure.gravatar.com/avatar/ad925bdf7fba0f9608daa94bb809531a?s=60&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/ad925bdf7fba0f9608daa94bb809531a?s=120&#038;d=mm&#038;r=g 2x' class='avatar avatar-60 thumbnail photo' height='60' width='60' loading='lazy'/>					<cite class="fn"><a href='' rel='external nofollow ugc' class='url'>Engue Gillier</a></cite> <span class="says">says:</span>				</div><!-- .comment-author -->
+
+				<div class="comment-metadata">
+					<a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/#comment-51">
+						<time datetime="2017-10-03T08:04:06+00:00">
+							October 3, 2017 at 8:04 am						</time>
+					</a>
+									</div><!-- .comment-metadata -->
+
+							</footer><!-- .comment-meta -->
+
+			<div class="comment-content">
+				<p>The process is almost always the same:<br/>
+– First, explore the app from the outside. List the entry points (url is not the only way in, think postMessage for iframe for example), read the doc, google it, read any blog or stackoverflow topic about it, understand the app features and the business purpose it solves<br/>
+– Then debug! Browsers make it very easy to debug web apps. Use all the console tabs to see how the app is working. Modify some variables and see how the app reacts, use external tools like Burp Suite or browser extensions to modify and debug the app more in-depth.<br/>
+– Read the source code. If it’s open source, grab the source. If it’s compiled, decompile the binaries. If it’s minified or obfuscated like javascript, modify the code to make it more readable. Try to understand the security features in the code and see how you can bypass them. Think about what the developers could have missed or misunderstood.</p>
+<p>If you’re a beginner in this, don’t go after Google or Facebook right away. Start with easier targets. Large, old websites are good targets, like Yahoo and Paypal 😉</p>
+			</div><!-- .comment-content -->
+
+					</article><!-- .comment-body -->
+
+	<ul class="children">
+
+	<li id="comment-52" class="comment even depth-3">
+		<article id="div-comment-52" class="comment-body">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt='' src='https://secure.gravatar.com/avatar/7c64864b4d212b0bc77052b89ab7fc02?s=60&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/7c64864b4d212b0bc77052b89ab7fc02?s=120&#038;d=mm&#038;r=g 2x' class='avatar avatar-60 thumbnail photo' height='60' width='60' loading='lazy'/>					<cite class="fn">nick</cite> <span class="says">says:</span>				</div><!-- .comment-author -->
+
+				<div class="comment-metadata">
+					<a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/#comment-52">
+						<time datetime="2017-10-05T03:16:44+00:00">
+							October 5, 2017 at 3:16 am						</time>
+					</a>
+									</div><!-- .comment-metadata -->
+
+							</footer><!-- .comment-meta -->
+
+			<div class="comment-content">
+				<p>Thank you, Enguerran~<br/>
+It&#8217;s very helpful advice.  I&#8217;m  very beginner in this area.  as you said, I think I&#8217;m gonna start  with old website 🙂 </p>
+<p>Thank you again.  Have a nice day~:)</p>
+			</div><!-- .comment-content -->
+
+					</article><!-- .comment-body -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+		</ul><!-- .comment-list -->
+
+		
+	
+			<p class="no-comments">Comments are closed.</p>
+	
+	
+</div><!-- #comments -->
+
+		
+		</main><!-- #main -->
+	</div><!-- #primary -->
+
+	<div id="secondary" class="widget-area col-md-4" role="complementary">
+				<aside id="search-2" class="widget clearfix widget_search"><form role="search" method="get" class="search-form form-inline" action="/">
+<div class="form-group">
+	<label>
+		<span class="screen-reader-text sr-only">Search for:</span>
+		<input type="search" class="search-field form-control" placeholder="Search &hellip;" value="" name="s">
+	</label>
+	<input type="submit" class="search-submit btn btn-primary" value="Search">
+</div><!-- .form-group -->
+</form>
+</aside>
+		<aside id="recent-posts-2" class="widget clearfix widget_recent_entries">
+		<h2 class="widget-title">Recent Posts</h2>
+		<ul>
+											<li>
+					<a href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/">DOM XSS in Gmail with a little help from Chrome</a>
+									</li>
+											<li>
+					<a href="/2018/07/into-the-borg-ssrf-inside-google-production-network/">Into the Borg &#8211; SSRF inside Google production network</a>
+									</li>
+											<li>
+					<a href="/2018/03/stored-xss-on-facebook/">Stored XSS on Facebook</a>
+									</li>
+											<li>
+					<a href="/2017/10/flashme-wordpress-vulnerability-disclosure-cve-2016-9263/">FlashME! &#8211; WordPress vulnerability disclosure [CVE-2016-9263]</a>
+									</li>
+											<li>
+					<a href="/2017/10/cve-2016-9263-unpatched-xsf-vulnerability-in-wordpress/">[CVE-2016-9263] XSF vulnerability in WordPress [UPDATED]</a>
+									</li>
+					</ul>
+
+		</aside><aside id="recent-comments-2" class="widget clearfix widget_recent_comments"><h2 class="widget-title">Recent Comments</h2><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link"><a href='' rel='external nofollow ugc' class='url'>Engue Gillier</a></span> on <a href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-48064">DOM XSS in Gmail with a little help from Chrome</a></li><li class="recentcomments"><span class="comment-author-link">vahhitiu</span> on <a href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-47020">DOM XSS in Gmail with a little help from Chrome</a></li><li class="recentcomments"><span class="comment-author-link">Just a nOob</span> on <a href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-46910">DOM XSS in Gmail with a little help from Chrome</a></li><li class="recentcomments"><span class="comment-author-link">Nani</span> on <a href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-46019">DOM XSS in Gmail with a little help from Chrome</a></li><li class="recentcomments"><span class="comment-author-link"><a href='' rel='external nofollow ugc' class='url'>Engue Gillier</a></span> on <a href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-45513">DOM XSS in Gmail with a little help from Chrome</a></li></ul></aside>	</div><!-- #secondary -->
+</div><!-- .row -->
+</div><!-- .container -->
+
+	</div><!-- #content -->
+
+	
+	<div id="sidebar-pagebottom" class="sidebar-pagebottom">
+				<aside id="block-4" class="widget widget_block clearfix"><div class="container">
+<div class="wp-container-1 wp-block-buttons"></div>
+</div><!-- container --></aside>	</div><!-- .sidebar-pagebottom -->
+
+
+		<footer id="colophon" class="site-footer" role="contentinfo">
+		
+	
+
+	
+	
+		  
+	<div class="after-footer">
+	<div class="container">
+
+					<div class="footer-nav-menu pull-left">
+			<nav id="footer-navigation" class="secondary-navigation" role="navigation">
+				<h1 class="menu-toggle sr-only">Footer Menu</h1>
+				
+		<div class="sample-menu-footer-container">
+		<ul id="sample-menu-footer" class="list-inline dividers">
+		<li id="menu-item-sample-1" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-sample-1"><a class="smoothscroll" title="Back to top of page" href="#page"><span class="fa fa-angle-up"></span> Top</a></li><li id="menu-item-sample-2" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-sample-2"><a title="Home" href="">Home</a></li>
+		</ul>
+		</div>			</nav>
+			</div><!-- .footer-nav-menu -->
+		
+					<div id="site-credits" class="site-credits pull-right">
+			<span class="credits-copyright">&copy; 2026 <a href="/" rel="home">OpnSec</a>. </span><span class="credits-theme">Theme by <a href="http://xtremelysocial.com/wordpress/flat/" rel="profile" target="_blank">XtremelySocial</a>.</span>			</div><!-- .site-credits -->
+		
+	</div><!-- .container -->
+	</div><!-- .after-footer -->
+			
+	</footer><!-- #colophon -->
+
+</div><!-- #page -->
+
+<style>.wp-container-1{display:flex;gap:.5em;flex-wrap:wrap;align-items:center}.wp-container-1>*{margin:0}</style>
+<link rel='stylesheet' id='hljstheme-css' href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/agate.min.css?ver=0.6.2' type='text/css' media='all'/>
+<script type='text/javascript' src='/wp-content/themes/flat-bootstrap/bootstrap/js/bootstrap.min.js?ver=3.3.6' id='bootstrap-js'></script>
+<script type='text/javascript' src='/wp-content/themes/flat-bootstrap/js/theme.js?ver=20160303' id='theme-js'></script>
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js?ver=0.6.2' id='hljs-js'></script>
+<script type='text/javascript' id='twitter-wjs-js-extra'>//<![CDATA[
+window.twttr=(function(w){t=w.twttr||{};t._e=[];t.ready=function(f){t._e.push(f);};return t;}(window));
+//]]></script>
+<script type="text/javascript" id="twitter-wjs" async defer src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <style>code.hljs{}</style>
+    <script type="text/javascript">(function($,window){var init_fn_flag=false;var init_fn=(function(){if(init_fn_flag)return;init_fn_flag=true;hljs.configure({"tabReplace":"    ","useBR":true});$('pre code').each(function(i,block){hljs.highlightBlock(block);});});$(document).ready(init_fn);$(window).on("load",init_fn);})(jQuery,window);</script>
+<script type='text/javascript' src='https://stats.wp.com/e-202608.js' async='async' defer='defer'></script>
+<script type='text/javascript'>_stq=window._stq||[];_stq.push(['view',{v:'ext',j:'1:8.5.3',blog:'250189475',post:'8',tz:'0',srv:'opnsec.com'}]);_stq.push(['clickTrackerInit','250189475','8']);</script>
+
+</body>
+</html>

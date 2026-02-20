@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	
+	xmlns:georss="http://www.georss.org/georss"
+	xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	
+	>
+<channel>
+	<title>
+	Comments on: DOM XSS in Gmail with a little help from Chrome	</title>
+	<atom:link href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/feed/" rel="self" type="application/rss+xml" />
+	<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=dom-xss-in-gmail-with-a-little-help-from-chrome</link>
+	<description>Open mind Security and Crypto!</description>
+	<lastBuildDate>Fri, 30 Jul 2021 20:07:09 +0000</lastBuildDate>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.0.11</generator>
+	<item>
+		<title>
+		By: Engue Gillier		</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-48064</link>
+
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Mon, 18 May 2020 19:05:31 +0000</pubDate>
+		<guid isPermaLink="false">/?p=382#comment-48064</guid>
+
+					<description><![CDATA[In reply to &lt;a href=&quot;/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-47020&quot;&gt;vahhitiu&lt;/a&gt;.
+
+Good question, I didn&#039;t find a straight way to predict this random prefix! 
+I found ways to load an arbitrary iframe in Gmail but it requires user interaction so it&#039;s not practical.
+I reported the vulnerability to Google with a PoC where the Google engineer had to manually copy and paste the random prefix in an input to trigger the XSS. Google VRP validated the bug, maybe because a non secure random generator is not a proper security defense mechanism, so you have to suppose an attacker can predict the value.]]></description>
+			<content:encoded><![CDATA[<p>In reply to <a href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-47020">vahhitiu</a>.</p>
+<p>Good question, I didn&#8217;t find a straight way to predict this random prefix!<br />
+I found ways to load an arbitrary iframe in Gmail but it requires user interaction so it&#8217;s not practical.<br />
+I reported the vulnerability to Google with a PoC where the Google engineer had to manually copy and paste the random prefix in an input to trigger the XSS. Google VRP validated the bug, maybe because a non secure random generator is not a proper security defense mechanism, so you have to suppose an attacker can predict the value.</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: vahhitiu		</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-47020</link>
+
+		<dc:creator><![CDATA[vahhitiu]]></dc:creator>
+		<pubDate>Thu, 14 May 2020 09:03:15 +0000</pubDate>
+		<guid isPermaLink="false">/?p=382#comment-47020</guid>
+
+					<description><![CDATA[Great write up.But I don&#039;t really understand how you get this random prefix.I just saw that you introduced two ways to get this random channel code, one is to crack math.random(), and you said that this method is not suitable for this scenario, and the other is to load a self-controlled iframe in gmail Tab, and in the next paragraph you said you didn&#039;t find an easy way to load it.Could you tell me more clearly how to get this random prefix?]]></description>
+			<content:encoded><![CDATA[<p>Great write up.But I don&#8217;t really understand how you get this random prefix.I just saw that you introduced two ways to get this random channel code, one is to crack math.random(), and you said that this method is not suitable for this scenario, and the other is to load a self-controlled iframe in gmail Tab, and in the next paragraph you said you didn&#8217;t find an easy way to load it.Could you tell me more clearly how to get this random prefix?</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: Just a nOob		</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-46910</link>
+
+		<dc:creator><![CDATA[Just a nOob]]></dc:creator>
+		<pubDate>Wed, 13 May 2020 22:55:11 +0000</pubDate>
+		<guid isPermaLink="false">/?p=382#comment-46910</guid>
+
+					<description><![CDATA[Thanks for sharing! I really believe that the Dev tools its really a great tool to hack, we just need to know how to dominate this tool! Congrats for the achievement men! I already trying to read Google source code and I it was like WOW! The way how they randomly create the functions and vars and other code its mind blowing! So I really admire what u did! Keep Up!!]]></description>
+			<content:encoded><![CDATA[<p>Thanks for sharing! I really believe that the Dev tools its really a great tool to hack, we just need to know how to dominate this tool! Congrats for the achievement men! I already trying to read Google source code and I it was like WOW! The way how they randomly create the functions and vars and other code its mind blowing! So I really admire what u did! Keep Up!!</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: Nani		</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-46019</link>
+
+		<dc:creator><![CDATA[Nani]]></dc:creator>
+		<pubDate>Sat, 09 May 2020 16:53:20 +0000</pubDate>
+		<guid isPermaLink="false">/?p=382#comment-46019</guid>
+
+					<description><![CDATA[could u do exploit on url only? or any other parameters?]]></description>
+			<content:encoded><![CDATA[<p>could u do exploit on url only? or any other parameters?</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: Engue Gillier		</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-45513</link>
+
+		<dc:creator><![CDATA[Engue Gillier]]></dc:creator>
+		<pubDate>Thu, 07 May 2020 19:21:48 +0000</pubDate>
+		<guid isPermaLink="false">/?p=382#comment-45513</guid>
+
+					<description><![CDATA[In reply to &lt;a href=&quot;/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-45501&quot;&gt;JCVD&lt;/a&gt;.
+
+Thx all! Yes I encourage you to check other messages on Gmail and on other websites. In this example the workflow is simple: the message contains a url that is loaded as iframe src, without url sanitation nor origin check. 
+In other cases the workflow might be way more complex: message encoding, partial sanitation, complex payload,  etc...
+For example, what if google.com trusts *.doubleclick.net? :)]]></description>
+			<content:encoded><![CDATA[<p>In reply to <a href="/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-45501">JCVD</a>.</p>
+<p>Thx all! Yes I encourage you to check other messages on Gmail and on other websites. In this example the workflow is simple: the message contains a url that is loaded as iframe src, without url sanitation nor origin check.<br />
+In other cases the workflow might be way more complex: message encoding, partial sanitation, complex payload,  etc&#8230;<br />
+For example, what if google.com trusts *.doubleclick.net? 🙂</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: JCVD		</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-45501</link>
+
+		<dc:creator><![CDATA[JCVD]]></dc:creator>
+		<pubDate>Thu, 07 May 2020 18:36:25 +0000</pubDate>
+		<guid isPermaLink="false">/?p=382#comment-45501</guid>
+
+					<description><![CDATA[Could it be possible to apply the same technique with the others messages if the page doesn&#039;t check the origin?]]></description>
+			<content:encoded><![CDATA[<p>Could it be possible to apply the same technique with the others messages if the page doesn&#8217;t check the origin?</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: Binit Ghimire		</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-45104</link>
+
+		<dc:creator><![CDATA[Binit Ghimire]]></dc:creator>
+		<pubDate>Wed, 06 May 2020 04:59:39 +0000</pubDate>
+		<guid isPermaLink="false">/?p=382#comment-45104</guid>
+
+					<description><![CDATA[This is really an AWESOME research! Thank you for sharing, and congratulations!]]></description>
+			<content:encoded><![CDATA[<p>This is really an AWESOME research! Thank you for sharing, and congratulations!</p>
+]]></content:encoded>
+		
+			</item>
+		<item>
+		<title>
+		By: Sergio		</title>
+		<link>/2020/05/dom-xss-in-gmail-with-a-little-help-from-chrome/#comment-44522</link>
+
+		<dc:creator><![CDATA[Sergio]]></dc:creator>
+		<pubDate>Mon, 04 May 2020 04:07:25 +0000</pubDate>
+		<guid isPermaLink="false">/?p=382#comment-44522</guid>
+
+					<description><![CDATA[Really appreciated how clear you explained all the steps. Congrats!]]></description>
+			<content:encoded><![CDATA[<p>Really appreciated how clear you explained all the steps. Congrats!</p>
+]]></content:encoded>
+		
+			</item>
+	</channel>
+</rss>
